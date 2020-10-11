@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ChatListFragment">
+
+    <EditText
+        android:id="@+id/addressee_et"
+        android:inputType="numberDecimal"
+        android:maxLines="1"
+        android:hint="Addressee number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/message_et"
+        android:hint="Your message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <CheckBox
+        android:id="@+id/invert_polarity_cb"
+        android:text="Invert polarity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Switch
+        android:id="@+id/type_switch"
+        android:text="Alpha (textual)"
+        tools:checked="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Spinner
+        android:id="@+id/tone_spinner"
+        android:entries="@array/pager_tones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Spinner
+        android:id="@+id/frequency_spinner"
+        android:entries="@array/pager_frequencies"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/send_button"
+        android:text="Send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pager_tones">
+        <item>Tone A</item>
+        <item>Tone B</item>
+        <item>Tone C</item>
+        <item>Tone D</item>
+    </string-array>
+    <string-array name="pager_frequencies">
+        <item>512</item>
+        <item>1024</item>
+        <item>2400</item>
+    </string-array>
+</resources>
