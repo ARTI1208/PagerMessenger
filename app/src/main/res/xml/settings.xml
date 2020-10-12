@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference android:title="Test" />
+    <SwitchPreference
+        android:key="use_pin_code"
+        android:title="Pin-code to open app" />
+
+    <SwitchPreference
+        android:key="use_biometrics"
+        android:dependency="use_pin_code"
+        android:title="Biometrics to open app" />
+
 </PreferenceScreen>

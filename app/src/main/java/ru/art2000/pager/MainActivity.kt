@@ -13,7 +13,7 @@ import ru.art2000.pager.ui.NavigationCoordinator
 
 class MainActivity : AppCompatActivity(), NavigationCoordinator {
 
-    private lateinit var navController: NavController
+    private lateinit var navigationController: NavController
     private lateinit var mainActivityBinding: MainActivityBinding
 
     private var backNavDirection: NavDirections? = null
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), NavigationCoordinator {
         mainActivityBinding = MainActivityBinding.inflate(layoutInflater)
         setContentView(mainActivityBinding.root)
 
-        navController = Navigation.findNavController(this, R.id.fragment_container)
+        navigationController = Navigation.findNavController(this, R.id.fragment_container)
 
         setup()
     }
@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity(), NavigationCoordinator {
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter)
     }
+
+    override val navController: NavController
+        get() = navigationController
 
     override fun navigateTo(direction: NavDirections) {
         navController.navigate(direction)

@@ -1,19 +1,17 @@
-package ru.art2000.pager.ui
+package ru.art2000.pager.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import ru.art2000.pager.databinding.LoginFragmentBinding
-import ru.art2000.pager.extensions.requireCompatActivity
+import ru.art2000.pager.databinding.ChatFragmentBinding
+import ru.art2000.pager.ui.NavigationCoordinator
 
-class LoginFragment : Fragment() {
+class ChatFragment : Fragment() {
 
-    private lateinit var viewBinding: LoginFragmentBinding
+    private lateinit var viewBinding: ChatFragmentBinding
     private lateinit var navigationCoordinator: NavigationCoordinator
 
     override fun onAttach(context: Context) {
@@ -25,20 +23,13 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = LoginFragmentBinding.inflate(inflater, container, false).also {
+    ): View = ChatFragmentBinding.inflate(inflater, container, false).also {
         viewBinding = it
     }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewBinding.navigateNext.setOnClickListener {
-            navigationCoordinator.navigateTo(LoginFragmentDirections.actionLoginFragmentToChatListFragment())
-        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        requireCompatActivity().supportActionBar?.hide()
-    }
 }

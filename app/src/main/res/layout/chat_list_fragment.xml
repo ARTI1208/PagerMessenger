@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.ChatListFragment">
+    tools:context=".ui.fragments.ChatListFragment">
 
     <EditText
         android:id="@+id/addressee_et"

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/login"
-        android:name="ru.art2000.pager.ui.LoginFragment"
+        android:name="ru.art2000.pager.ui.fragments.LoginFragment"
         android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_chatListFragment"
@@ -18,7 +18,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatListFragment"
-        android:name="ru.art2000.pager.ui.ChatListFragment"
+        android:name="ru.art2000.pager.ui.fragments.ChatListFragment"
         android:label="chat_list_fragment"
         tools:layout="@layout/chat_list_fragment">
         <action
@@ -32,7 +32,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
-        android:name="ru.art2000.pager.ui.ChatFragment"
+        android:name="ru.art2000.pager.ui.fragments.ChatFragment"
         android:label="ChatFragment" >
         <action
             android:id="@+id/action_chatFragment_to_chatListFragment"
@@ -40,11 +40,26 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="ru.art2000.pager.ui.SettingsFragment"
+        android:name="ru.art2000.pager.ui.fragments.SettingsFragment"
         android:label="SettingsFragment" >
         <action
             android:id="@+id/action_settingsFragment_to_chatListFragment"
             app:destination="@id/chatListFragment"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_settingsFragment_to_pinCreatorFragment"
+            app:destination="@id/pinCreatorFragment" />
+        <argument
+            android:name="pin_set"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/pinCreatorFragment"
+        android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment"
+        android:label="PinCreatorFragment" >
+        <action
+            android:id="@+id/action_pinCreatorFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 </navigation>

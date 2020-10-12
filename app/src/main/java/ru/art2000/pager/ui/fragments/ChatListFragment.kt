@@ -1,4 +1,4 @@
-package ru.art2000.pager.ui
+package ru.art2000.pager.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -11,7 +11,7 @@ import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
-import ru.art2000.pager.ui.main.ChatListFragmentDirections
+import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.ui.main.MainViewModel
 
 class ChatListFragment : Fragment() {
