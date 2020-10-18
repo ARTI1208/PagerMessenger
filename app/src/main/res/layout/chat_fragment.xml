@@ -1,12 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/tmp_tv"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="Chat" />
 
-</LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messages_list_recycler"
+        android:layout_below="@+id/tmp_tv"
+        android:layout_above="@+id/send_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+    <LinearLayout
+        android:id="@+id/send_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+
+        <EditText
+            android:id="@+id/message_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Your message" />
+
+        <CheckBox
+            android:id="@+id/invert_polarity_cb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Invert polarity" />
+
+        <Switch
+            android:id="@+id/type_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Alpha (textual)" />
+
+        <Spinner
+            android:id="@+id/tone_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/pager_tones" />
+
+        <Spinner
+            android:id="@+id/frequency_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/pager_frequencies" />
+
+        <Button
+            android:id="@+id/send_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send" />
+
+    </LinearLayout>
+
+</RelativeLayout>
