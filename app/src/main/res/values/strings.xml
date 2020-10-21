@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Pager</string>
+    <string name="message_action_resend">Resend</string>
 </resources>

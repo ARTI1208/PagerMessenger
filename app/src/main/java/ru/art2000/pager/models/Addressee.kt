@@ -9,5 +9,8 @@ data class Addressee(
     @NonNull
     @PrimaryKey
     val number: Int,
-    var nickname: String? = null
-)
+    val nickname: String? = null
+) {
+    fun toDisplayName(): String =
+        if (nickname.isNullOrEmpty()) number.toString() else "$nickname ($number)"
+}

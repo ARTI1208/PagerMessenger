@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="send_button_size">50dp</dimen>
+    <dimen name="message_input_collapsed_height">50dp</dimen>
+    <dimen name="message_card_min_height">20dp</dimen>
+    <dimen name="message_card_min_horizontal_margin">40dp</dimen>
+</resources>

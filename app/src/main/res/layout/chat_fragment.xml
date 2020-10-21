@@ -1,68 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tmp_tv"
-        android:layout_alignParentTop="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Chat" />
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messages_list_recycler"
-        android:layout_below="@+id/tmp_tv"
-        android:layout_above="@+id/send_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="@dimen/message_input_collapsed_height" />
 
-
-    <LinearLayout
-        android:id="@+id/send_layout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/send_layout_coordinator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
+        android:layout_alignParentBottom="true">
 
 
-        <EditText
-            android:id="@+id/message_et"
+        <LinearLayout
+            android:id="@+id/send_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Your message" />
+            android:orientation="vertical"
+            app:behavior_peekHeight="@dimen/message_input_collapsed_height"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <CheckBox
-            android:id="@+id/invert_polarity_cb"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Invert polarity" />
 
-        <Switch
-            android:id="@+id/type_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Alpha (textual)" />
+            <!--            <com.google.android.material.card.MaterialCardView-->
+            <!--                android:id="@+id/card_wrapper"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="@dimen/bottom_view_horizontal_margin"-->
+            <!--                android:layout_marginTop="@dimen/bottom_view_vertical_margin"-->
+            <!--                android:layout_marginEnd="@dimen/bottom_view_horizontal_margin"-->
+            <!--                android:layout_marginBottom="@dimen/bottom_view_vertical_margin"-->
+            <!--                app:cardBackgroundColor="?floatingBottomBarBackground"-->
+            <!--                app:cardCornerRadius="@dimen/bottom_view_corner_radius"-->
+            <!--                app:cardUseCompatPadding="true"-->
+            <!--                app:cardElevation="@dimen/bottom_view_elevation"-->
+            <!--                app:elevation="@dimen/bottom_view_elevation"-->
+            <!--                app:strokeColor="?strokeColor"-->
+            <!--                app:strokeWidth="@dimen/bottom_view_stroke_width"-->
+            <!--                tools:ignore="PrivateResource">-->
+            <!--            </com.google.android.material.card.MaterialCardView>-->
 
-        <Spinner
-            android:id="@+id/tone_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/pager_tones" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/message_input_collapsed_height"
+                android:orientation="horizontal">
 
-        <Spinner
-            android:id="@+id/frequency_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/pager_frequencies" />
+                <ImageButton
+                    android:id="@+id/send_settings_button"
+                    android:layout_width="@dimen/send_button_size"
+                    android:layout_height="@dimen/send_button_size"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:backgroundTint="@null"
+                    android:src="@drawable/ic_menu_settings" />
 
-        <Button
-            android:id="@+id/send_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send" />
+                <EditText
+                    android:id="@+id/message_et"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Your message" />
 
-    </LinearLayout>
+                <ImageButton
+                    android:id="@+id/send_button"
+                    android:layout_width="@dimen/send_button_size"
+                    android:layout_height="@dimen/send_button_size"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:backgroundTint="@null"
+                    android:src="@drawable/ic_send_message" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/invert_polarity_cb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Invert polarity" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/type_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Alpha (textual)" />
+
+            <Spinner
+                android:id="@+id/tone_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/pager_tones" />
+
+            <Spinner
+                android:id="@+id/frequency_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/pager_frequencies" />
+
+
+        </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </RelativeLayout>

@@ -11,5 +11,6 @@ class Message(
     val id: Int = 0,
     val chatId: Int,
     val text: String,
-    val settings: Int
+    val settings: Int,
+    val success: Boolean = true
 )

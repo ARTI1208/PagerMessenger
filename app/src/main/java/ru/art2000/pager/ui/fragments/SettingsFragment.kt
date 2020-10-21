@@ -3,16 +3,15 @@ package ru.art2000.pager.ui.fragments
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import androidx.preference.SwitchPreferenceCompat
 import ru.art2000.pager.R
 import ru.art2000.pager.extensions.SecureSharedPreferences
+import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.ui.NavigationCoordinator
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -32,6 +31,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         navigationCoordinator.setSupportsBack(true)
+        requireCompatActivity().supportActionBar?.title = "Settings"
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

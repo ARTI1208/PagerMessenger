@@ -1,21 +1,17 @@
 package ru.art2000.pager.ui.fragments.chatlist
 
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.internal.TextWatcherAdapter
-import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
@@ -54,19 +50,18 @@ class ChatListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
-        viewBinding.typeSwitch.isChecked = true
-        viewBinding.frequencySpinner.setSelection(AntennaCommunicator.Frequency.F2400.ordinal)
 
         viewBinding.newChatFab.setOnClickListener {
 
             val addresseeInput = EditText(requireContext())
-            addresseeInput.inputType = EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
+            addresseeInput.inputType =
+                EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
 
 
             val dialog = AlertDialog.Builder(requireContext())
                 .setTitle("Input addressee")
                 .setView(addresseeInput)
-                .setNegativeButton("Cancel") { dialog, _  -> dialog.cancel() }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
                 .setPositiveButton("Create/Open") { dialog, _ ->
                     dialog.dismiss()
 
@@ -90,7 +85,7 @@ class ChatListFragment : Fragment() {
         }
 
 
-        viewBinding.chatListRecycler.adapter = ChatListAdapter(requireContext(), emptyList(), {})
+        viewBinding.chatListRecycler.adapter = ChatListAdapter(requireContext(), emptyList()) {}
         viewBinding.chatListRecycler.layoutManager = LinearLayoutManager(requireContext())
 
     }
@@ -99,6 +94,7 @@ class ChatListFragment : Fragment() {
         super.onResume()
         navigationCoordinator.setSupportsBack(false)
         requireCompatActivity().supportActionBar?.show()
+        requireCompatActivity().supportActionBar?.title = "Pager"
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -123,28 +119,6 @@ class ChatListFragment : Fragment() {
 
         viewModel.allChats().observe(viewLifecycleOwner) {
             viewBinding.chatListRecycler.adapter = ChatListAdapter(requireContext(), it, ::openChat)
-        }
-
-
-        viewBinding.sendButton.setOnClickListener {
-            val addressee = viewBinding.addresseeEt.text.toString().toIntOrNull()
-
-            if (addressee == null) {
-                Toast.makeText(requireContext(), "Input valid addressee", Toast.LENGTH_SHORT).show()
-            } else {
-                val tone =
-                    AntennaCommunicator.Tone.values()[viewBinding.toneSpinner.selectedItemPosition]
-                val frequency =
-                    AntennaCommunicator.Frequency.values()[viewBinding.frequencySpinner.selectedItemPosition]
-//                viewModel.sendToPager(
-//                    addressee,
-//                    viewBinding.messageEt.text.toString(),
-//                    tone,
-//                    frequency,
-//                    viewBinding.invertPolarityCb.isChecked,
-//                    viewBinding.typeSwitch.isChecked
-//                )
-            }
         }
     }
 
