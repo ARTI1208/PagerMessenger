@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Common-->
+    <string name="cancel">Отмена</string>
+    <string name="ok">OK</string>
+
+    <!--Auth-->
+    <string name="biometrics_auth_title">Вход в приложение пейджера</string>
+    <string name="biometrics_auth_subtitle">Это нужно для проверки пользователя</string>
+    <string name="biometrics_auth_description">Или просто введите пин-код</string>
+    <string name="biometrics_auth_negative_button">Вход по пин-коду</string>
+
+    <string name="biometrics_check_failed">Ошибка при проверке биометрии</string>
+
+    <!--Chat list-->
+    <string name="empty_view_text">Нет сообщений</string>
+
+    <string name="dialog_new_chat_title">Введите номер получателя</string>
+    <string name="dialog_new_chat_ok_button">Создать/Открыть</string>
+
+    <!--Chat-->
+    <string name="message_input_hint">Ваше сообщение</string>
+    <string name="message_setting_invert_polarity">Инвертировать полярность</string>
+    <string name="message_setting_invert_alpha">Текстовое</string>
+    <string name="message_setting_tone">Мелодия</string>
+    <string name="message_setting_frequency">Частота</string>
+
+    <string name="menu_action_rename">Переименовать</string>
+
+    <string name="message_action_resend">Отправить заново</string>
+
+    <string name="dialog_rename_chat_title">Введите новое имя получателя</string>
+
+    <!--Settings-->
+    <string name="settings">Настройки</string>
+    <string name="preference_pin_code_title">Вход по пин-коду</string>
+    <string name="preference_biometrics_title">Вход с помощью биометрии</string>
+    <string name="biometrics_setup_description">Или используйте только пин-код</string>
+    <string name="biometrics_setup_negative_button">Только пин-код</string>
+
+    <string name="pin_setup_title">Придумайте пин-код</string>
+    <string name="pin_check_title">Повторите пин-код</string>
+
+</resources>

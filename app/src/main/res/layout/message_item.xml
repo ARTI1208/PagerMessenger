@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginVertical="10dp"
+        android:layout_marginVertical="5dp"
         android:layout_marginStart="@dimen/message_card_min_horizontal_margin"
         android:backgroundTint="@color/colorPrimary"
         app:cardCornerRadius="10dp">

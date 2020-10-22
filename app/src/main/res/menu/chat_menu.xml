@@ -5,6 +5,6 @@
     <item
         android:id="@+id/rename_addressee"
         android:icon="@drawable/ic_edit"
-        android:title="Rename"
+        android:title="@string/menu_action_rename"
         app:showAsAction="ifRoom" />
 </menu>

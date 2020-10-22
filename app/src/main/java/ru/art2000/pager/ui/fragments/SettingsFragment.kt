@@ -31,7 +31,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         navigationCoordinator.setSupportsBack(true)
-        requireCompatActivity().supportActionBar?.title = "Settings"
+        requireCompatActivity().supportActionBar?.setTitle(R.string.settings)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -78,25 +78,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun openBiometricPrompt(biometricPreference: SwitchPreference) {
         val prompt = BiometricPrompt(this, object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                Toast.makeText(requireContext(), "error", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.biometrics_check_failed, Toast.LENGTH_SHORT).show()
                 biometricPreference.isChecked = false
             }
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                Toast.makeText(requireContext(), "success", Toast.LENGTH_SHORT).show()
             }
 
             override fun onAuthenticationFailed() {
-                Toast.makeText(requireContext(), "fail", Toast.LENGTH_SHORT).show()
-                biometricPreference.isChecked = false
             }
         })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Title")
-            .setSubtitle("Subtitle")
-            .setDescription("Desc")
-            .setNegativeButtonText("Negative Button")
+            .setTitle(requireContext().getString(R.string.biometrics_auth_title))
+            .setSubtitle(requireContext().getString(R.string.biometrics_auth_subtitle))
+            .setDescription(requireContext().getString(R.string.biometrics_setup_description))
+            .setNegativeButtonText(requireContext().getString(R.string.biometrics_setup_negative_button))
             .build()
 
         prompt.authenticate(promptInfo)

@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import ru.art2000.pager.R
 import ru.art2000.pager.databinding.PinCreatorFragmentBinding
+import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.ui.views.PinCodeInput
 
@@ -38,5 +40,10 @@ class PinCreatorFragment: Fragment() {
                 navigationCoordinator.navController.popBackStack()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireCompatActivity().supportActionBar?.setTitle(R.string.pin_setup_title)
     }
 }

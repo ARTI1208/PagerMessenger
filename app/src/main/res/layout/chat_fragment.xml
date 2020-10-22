@@ -26,7 +26,10 @@
             app:behavior_peekHeight="@dimen/message_input_collapsed_height"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-
+            <View
+                android:background="#ffeeeeee"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
             <!--            <com.google.android.material.card.MaterialCardView-->
             <!--                android:id="@+id/card_wrapper"-->
             <!--                android:layout_width="match_parent"-->
@@ -63,7 +66,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Your message" />
+                    android:hint="@string/message_input_hint" />
 
                 <ImageButton
                     android:id="@+id/send_button"
@@ -74,29 +77,129 @@
                     android:src="@drawable/ic_send_message" />
             </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/invert_polarity_cb"
+            <LinearLayout
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Invert polarity" />
+                android:layout_height="match_parent" >
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/type_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Alpha (textual)" />
+                <CheckBox
+                    android:id="@+id/invert_polarity_cb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/message_setting_invert_polarity" />
 
-            <Spinner
-                android:id="@+id/tone_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/pager_tones" />
+                <CheckBox
+                    android:id="@+id/type_switch"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/message_setting_invert_alpha" />
 
-            <Spinner
-                android:id="@+id/frequency_spinner"
+            </LinearLayout>
+
+            <TextView
+                android:text="@string/message_setting_tone"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/pager_frequencies" />
+                android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:id="@+id/tone_group"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:checked="true"
+                    android:id="@+id/tone_a_radio"
+                    android:text="A"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/tone_b_radio"
+                    android:text="B"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/tone_c_radio"
+                    android:text="C"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/tone_d_radio"
+                    android:text="D"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+            <TextView
+                android:text="@string/message_setting_frequency"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:id="@+id/freq_group"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:layout_marginBottom="@dimen/message_settings_vertical_margin"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/freq_512_radio"
+                    android:text="512"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/freq_1200_radio"
+                    android:text="1200"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <RadioButton
+                    android:id="@+id/freq_2400_radio"
+                    android:checked="true"
+                    android:text="2400"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+            </RadioGroup>
+
+
+<!--            <Spinner-->
+<!--                android:id="@+id/tone_spinner"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:entries="@array/pager_tones" />-->
+
+<!--            <Spinner-->
+<!--                android:id="@+id/frequency_spinner"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:entries="@array/pager_frequencies" />-->
 
 
         </LinearLayout>

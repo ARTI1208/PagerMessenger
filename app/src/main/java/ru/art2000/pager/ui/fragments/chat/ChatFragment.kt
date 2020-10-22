@@ -79,10 +79,18 @@ class ChatFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val tone =
-                AntennaCommunicator.Tone.values()[viewBinding.toneSpinner.selectedItemPosition]
-            val frequency =
-                AntennaCommunicator.Frequency.values()[viewBinding.frequencySpinner.selectedItemPosition]
+            val tone = when (viewBinding.toneGroup.checkedRadioButtonId) {
+                viewBinding.toneBRadio.id -> AntennaCommunicator.Tone.B
+                viewBinding.toneCRadio.id -> AntennaCommunicator.Tone.C
+                viewBinding.toneDRadio.id -> AntennaCommunicator.Tone.D
+                else -> AntennaCommunicator.Tone.A
+            }
+
+            val frequency = when (viewBinding.freqGroup.checkedRadioButtonId) {
+                viewBinding.freq512Radio.id -> AntennaCommunicator.Frequency.F512
+                viewBinding.freq1200Radio.id -> AntennaCommunicator.Frequency.F1200
+                else -> AntennaCommunicator.Frequency.F2400
+            }
 
             val sendResult = viewModel.sendMessage(
                 args.chat,
@@ -152,10 +160,10 @@ class ChatFragment : Fragment() {
             }
 
             val dialog = AlertDialog.Builder(requireContext())
-                .setTitle("Input new addressee name")
+                .setTitle(R.string.dialog_rename_chat_title)
                 .setView(addresseeInput)
-                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-                .setPositiveButton("Rename") { dialog, _ ->
+                .setNegativeButton(R.string.dialog_rename_chat_cancel_button) { dialog, _ -> dialog.cancel() }
+                .setPositiveButton(R.string.dialog_rename_chat_ok_button) { dialog, _ ->
                     dialog.dismiss()
 
                     thread {

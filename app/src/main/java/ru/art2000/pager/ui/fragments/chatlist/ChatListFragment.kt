@@ -59,10 +59,10 @@ class ChatListFragment : Fragment() {
 
 
             val dialog = AlertDialog.Builder(requireContext())
-                .setTitle("Input addressee")
+                .setTitle(R.string.dialog_new_chat_title)
                 .setView(addresseeInput)
-                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-                .setPositiveButton("Create/Open") { dialog, _ ->
+                .setNegativeButton(R.string.dialog_new_chat_cancel_button) { dialog, _ -> dialog.cancel() }
+                .setPositiveButton(R.string.dialog_new_chat_ok_button) { dialog, _ ->
                     dialog.dismiss()
 
                     thread {
@@ -94,7 +94,7 @@ class ChatListFragment : Fragment() {
         super.onResume()
         navigationCoordinator.setSupportsBack(false)
         requireCompatActivity().supportActionBar?.show()
-        requireCompatActivity().supportActionBar?.title = "Pager"
+        requireCompatActivity().supportActionBar?.setTitle(R.string.app_name)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
