@@ -5,6 +5,17 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:listDivider">@drawable/chat_list_divider</item>
+    </style>
+
+    <style name="ChatItemTitle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="ChatItemLastMessage">
+        <item name="android:textSize">16sp</item>
     </style>
 
 </resources>

@@ -16,9 +16,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return listOf(
             SimpleAction(
                 R.string.message_action_resend,
-                { sendMessage(chat, it.text) },
-                { !it.success },
-                { !it.success })
+                { sendMessage(it) },
+                { it.status < 0 },
+                { it.status < 0 })
         )
     }
 
@@ -36,6 +36,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun allMessages(chat: Chat): LiveData<List<Message>> {
         return messagesTable(getApplication()) { liveAllByChatId(chat.addresseeNumber) }
     }
+
+    private fun sendMessage(message: Message): Int = sendMessage(
+        Chat(message.chatId),
+        message.text,
+        message.tone,
+        message.frequency,
+        message.invert,
+        message.alpha
+    )
 
     fun sendMessage(
         chat: Chat,
@@ -57,17 +66,22 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         ).also {
             thread {
                 messagesTable(getApplication()) {
-                    insertMessage(
+                    safeInsertMessage(
                         Message(
                             0,
                             chat.addresseeNumber,
                             text,
-                            0,
-                            it >= 0
+                            AntennaCommunicator.encodeSettings(tone, frequency, invert, alpha)
+                                .toInt(),
+                            it
                         )
                     )
                 }
             }
         }
+    }
+
+    fun cleanUp(chat: Chat) {
+
     }
 }

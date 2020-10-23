@@ -1,10 +1,14 @@
 package ru.art2000.pager.ui.fragments.chat
 
 import android.content.Context
+import android.util.Log
 import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.databinding.MessageItemBinding
 import ru.art2000.pager.models.Message
@@ -12,9 +16,33 @@ import ru.art2000.pager.models.MessageAction
 
 class MessagesListAdapter(
     private val mContext: Context,
-    private val messages: List<Message>,
+    private var messages: List<Message>,
     private val actions: List<MessageAction> = emptyList()
 ) : RecyclerView.Adapter<MessagesListAdapter.MessageItemViewHolder>() {
+
+    public fun setNewData(newMessages: List<Message>) {
+        val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int {
+                return messages.size
+            }
+
+            override fun getNewListSize(): Int {
+                return newMessages.size
+            }
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return messages[oldItemPosition] == newMessages[newItemPosition]
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return messages[oldItemPosition] == newMessages[newItemPosition]
+            }
+
+        })
+
+        messages = newMessages
+        result.dispatchUpdatesTo(this)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
         return MessageItemViewHolder(
@@ -25,7 +53,7 @@ class MessagesListAdapter(
     override fun onBindViewHolder(holder: MessageItemViewHolder, position: Int) {
         val message = messages[position]
         holder.viewBinding.textTv.text = message.text
-        holder.viewBinding.errorImage.visibility = if (message.success) View.GONE else View.VISIBLE
+        holder.viewBinding.errorImage.visibility = if (message.status < 0) View.VISIBLE else View.GONE
 
 
 //        holder.viewBinding.messageCard.backgroundTintList = if (message.success) {

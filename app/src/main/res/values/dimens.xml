@@ -6,4 +6,6 @@
     <dimen name="message_card_min_horizontal_margin">40dp</dimen>
     <dimen name="message_settings_horizontal_margin">10dp</dimen>
     <dimen name="message_settings_vertical_margin">5dp</dimen>
+    <dimen name="chat_list_item_height">60dp</dimen>
+    <dimen name="window_padding_horizontal">10dp</dimen>
 </resources>

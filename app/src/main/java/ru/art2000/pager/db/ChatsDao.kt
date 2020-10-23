@@ -10,11 +10,11 @@ interface ChatsDao {
     @Query("SELECT * FROM chats")
     fun all(): List<Chat>
 
-    @Query("SELECT * FROM chats")
+    @Query("SELECT * FROM chats ORDER BY lastMessageId")
     fun liveAll(): LiveData<List<Chat>>
 
     @Query("SELECT * FROM chats WHERE addresseeNumber = :number")
-    fun byAddresseeNumber(number: Int): Chat
+    fun byAddresseeNumber(number: Int): Chat?
 
     @Insert
     fun insertChat(chat: Chat): Long

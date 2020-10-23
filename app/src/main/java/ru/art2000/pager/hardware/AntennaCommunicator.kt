@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import ru.art2000.pager.extensions.toInt
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
 
 object AntennaCommunicator {
@@ -23,7 +24,14 @@ object AntennaCommunicator {
         return availableDrivers.firstOrNull()
     }
 
-    private fun Boolean.toInt() = if (this) 1 else 0
+    public fun encodeSettings(
+        tone: Tone,
+        frequency: Frequency,
+        invert: Boolean,
+        alpha: Boolean): Byte {
+
+        return (-0x80 + 0x10 * tone.ordinal + 0x8 * alpha.toInt() + 0x2 * frequency.ordinal + 0x1 * invert.toInt()).toByte()
+    }
 
     @ExperimentalUnsignedTypes
     private fun encodeToBytes(
@@ -37,7 +45,7 @@ object AntennaCommunicator {
         val prefix = byteArrayOf(0x19, 0x52)
         val addresseeBytes = addressee.toString().toByteArray()
 
-        val settingsBytes = byteArrayOf((-0x80 + 0x10 * tone.ordinal + 0x8 * alpha.toInt() + 0x2 * frequency.ordinal + 0x1 * invert.toInt()).toByte())
+        val settingsBytes = byteArrayOf(encodeSettings(tone, frequency, invert, alpha))
 
         val postfix = byteArrayOf(0x18u.toByte())
 

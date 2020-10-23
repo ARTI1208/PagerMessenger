@@ -6,4 +6,5 @@
 
     <color name="messageFailed">#d32f2f</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
 </resources>

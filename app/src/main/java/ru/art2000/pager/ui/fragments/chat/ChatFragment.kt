@@ -36,6 +36,8 @@ class ChatFragment : Fragment() {
         )
     }
 
+    private lateinit var messagesAdapter: MessagesListAdapter
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         navigationCoordinator = context as NavigationCoordinator
@@ -54,9 +56,15 @@ class ChatFragment : Fragment() {
 
         viewBinding.messagesListRecycler.layoutManager =
             LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
+
+        messagesAdapter = MessagesListAdapter(requireContext(), emptyList(), viewModel.getMessageActions(args.chat))
+        viewBinding.messagesListRecycler.adapter = messagesAdapter
+
         viewModel.allMessages(args.chat).observe(viewLifecycleOwner) {
-            viewBinding.messagesListRecycler.adapter =
-                MessagesListAdapter(requireContext(), it, viewModel.getMessageActions(args.chat))
+            messagesAdapter.setNewData(it)
+            if (it.isNotEmpty()) {
+                viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
+            }
         }
     }
 
@@ -202,5 +210,10 @@ class ChatFragment : Fragment() {
                 requireCompatActivity().supportActionBar?.title = title
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
     }
 }

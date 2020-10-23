@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.internal.TextWatcherAdapter
 import ru.art2000.pager.R
@@ -19,6 +20,7 @@ import ru.art2000.pager.models.Chat
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatListViewModel
 import kotlin.concurrent.thread
+
 
 class ChatListFragment : Fragment() {
 
@@ -85,16 +87,28 @@ class ChatListFragment : Fragment() {
         }
 
 
-        viewBinding.chatListRecycler.adapter = ChatListAdapter(requireContext(), emptyList()) {}
+        viewBinding.chatListRecycler.adapter = ChatListAdapter(
+            requireActivity(),
+            emptyList(),
+            viewModel
+        ) {}
         viewBinding.chatListRecycler.layoutManager = LinearLayoutManager(requireContext())
+
+        val dividerItemDecoration = DividerItemDecoration(
+            requireContext(),
+            LinearLayoutManager.VERTICAL
+        )
+        viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
 
     }
 
     override fun onResume() {
         super.onResume()
         navigationCoordinator.setSupportsBack(false)
-        requireCompatActivity().supportActionBar?.show()
-        requireCompatActivity().supportActionBar?.setTitle(R.string.app_name)
+        requireCompatActivity().supportActionBar?.apply {
+            show()
+            setTitle(R.string.app_name)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -118,7 +132,20 @@ class ChatListFragment : Fragment() {
 
 
         viewModel.allChats().observe(viewLifecycleOwner) {
-            viewBinding.chatListRecycler.adapter = ChatListAdapter(requireContext(), it, ::openChat)
+            if (it.isEmpty()) {
+                viewBinding.emptyTextView.visibility = View.VISIBLE
+                viewBinding.chatListRecycler.visibility = View.GONE
+            } else {
+                viewBinding.emptyTextView.visibility = View.GONE
+                viewBinding.chatListRecycler.visibility = View.VISIBLE
+            }
+
+            viewBinding.chatListRecycler.adapter = ChatListAdapter(
+                requireActivity(),
+                it,
+                viewModel,
+                ::openChat
+            )
         }
     }
 
