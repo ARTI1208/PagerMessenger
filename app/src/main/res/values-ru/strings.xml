@@ -18,6 +18,8 @@
     <string name="dialog_new_chat_title">Введите номер получателя</string>
     <string name="dialog_new_chat_ok_button">Создать/Открыть</string>
 
+    <string name="chat_item_draft">Черновик</string>
+
     <!--Chat-->
     <string name="message_input_hint">Ваше сообщение</string>
     <string name="message_setting_invert_polarity">Инвертировать полярность</string>

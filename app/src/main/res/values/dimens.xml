@@ -8,4 +8,7 @@
     <dimen name="message_settings_vertical_margin">5dp</dimen>
     <dimen name="chat_list_item_height">60dp</dimen>
     <dimen name="window_padding_horizontal">10dp</dimen>
+    <dimen name="pin_pad_top_margin">100dp</dimen>
+    <dimen name="pin_pad_bottom_margin">60dp</dimen>
+    <dimen name="common_dp_1">1dp</dimen>"
 </resources>

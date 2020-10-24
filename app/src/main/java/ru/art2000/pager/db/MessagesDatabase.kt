@@ -17,6 +17,12 @@ abstract class MessagesDatabase : RoomDatabase() {
 
     public abstract fun messagesDao(): MessagesDao
 
+    fun <T> addresseeTable(actions: AddresseeDao.() -> T): T = actions(addresseeDao())
+
+    fun <T> chatsTable(actions: ChatsDao.() -> T): T = actions(chatsDao())
+
+    fun <T> messagesTable(actions: MessagesDao.() -> T): T = actions(messagesDao())
+
     companion object {
 
         private var INSTANCE: MessagesDatabase? = null

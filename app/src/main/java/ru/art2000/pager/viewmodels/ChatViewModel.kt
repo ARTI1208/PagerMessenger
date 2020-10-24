@@ -12,7 +12,7 @@ import kotlin.concurrent.thread
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    fun getMessageActions(chat: Chat): List<MessageAction> {
+    fun getMessageActions(chat: ChatView): List<MessageAction> {
         return listOf(
             SimpleAction(
                 R.string.message_action_resend,
@@ -22,23 +22,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun getAddressee(chat: Chat): Addressee? {
-        return addresseeTable(getApplication()) { byNumber(chat.addresseeNumber) }
-    }
-
-    fun renameAddressee(chat: Chat, newName: String) {
+    fun renameAddressee(addressee: Addressee, newName: String) {
         addresseeTable(getApplication()) {
-            deleteAddressee(chat.addresseeNumber)
-            insertAddressee(Addressee(chat.addresseeNumber, newName))
+            deleteAddressee(addressee.number)
+            insertAddressee(Addressee(addressee.number, newName))
         }
     }
 
-    fun allMessages(chat: Chat): LiveData<List<Message>> {
-        return messagesTable(getApplication()) { liveAllByChatId(chat.addresseeNumber) }
+    fun allMessages(chat: ChatView): LiveData<List<Message>> {
+        return messagesTable(getApplication()) { liveAllByChatId(chat.addressee.number) }
     }
 
     private fun sendMessage(message: Message): Int = sendMessage(
-        Chat(message.chatId),
+        message.chatId,
         message.text,
         message.tone,
         message.frequency,
@@ -47,7 +43,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     fun sendMessage(
-        chat: Chat,
+        addressee: Int,
         text: String,
         tone: AntennaCommunicator.Tone = AntennaCommunicator.Tone.A,
         frequency: AntennaCommunicator.Frequency = AntennaCommunicator.Frequency.F2400,
@@ -57,7 +53,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         return AntennaCommunicator.sendToPager(
             getApplication(),
-            chat.addresseeNumber,
+            addressee,
             text,
             tone,
             frequency,
@@ -69,19 +65,36 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     safeInsertMessage(
                         Message(
                             0,
-                            chat.addresseeNumber,
+                            addressee,
                             text,
-                            AntennaCommunicator.encodeSettings(tone, frequency, invert, alpha)
-                                .toInt(),
+                            tone, frequency, invert, alpha,
                             it
                         )
                     )
+                    deleteDrafts(addressee)
                 }
             }
         }
     }
 
-    fun cleanUp(chat: Chat) {
-
+    fun saveDraft(chat: ChatView,
+                  text: String,
+                  tone: AntennaCommunicator.Tone = AntennaCommunicator.Tone.A,
+                  frequency: AntennaCommunicator.Frequency = AntennaCommunicator.Frequency.F2400,
+                  invert: Boolean = false,
+                  alpha: Boolean = true) {
+        thread {
+            messagesTable(getApplication()) {
+                insertOrUpdateDraft(
+                    Message(
+                        0,
+                        chat.addressee.number,
+                        text,
+                        tone, frequency, invert, alpha,
+                        Message.STATUS_DRAFT
+                    )
+                )
+            }
+        }
     }
 }

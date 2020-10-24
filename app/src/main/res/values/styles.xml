@@ -8,14 +8,25 @@
         <item name="android:listDivider">@drawable/chat_list_divider</item>
     </style>
 
-    <style name="ChatItemTitle">
+    <style name="ChatItemTitle" parent="TextAppearance.MaterialComponents.Headline2">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">20sp</item>
     </style>
 
-    <style name="ChatItemLastMessage">
+    <style name="ChatItemLastMessage" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="MessageTextStyle">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="PinButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:foreground">@null</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
 </resources>

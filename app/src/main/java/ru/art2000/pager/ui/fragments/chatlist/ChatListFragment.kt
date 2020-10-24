@@ -3,6 +3,7 @@ package ru.art2000.pager.ui.fragments.chatlist
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -17,6 +18,7 @@ import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.models.Chat
+import ru.art2000.pager.models.ChatView
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatListViewModel
 import kotlin.concurrent.thread
@@ -33,6 +35,10 @@ class ChatListFragment : Fragment() {
     private lateinit var viewBinding: ChatListFragmentBinding
 
     private lateinit var navigationCoordinator: NavigationCoordinator
+
+    private lateinit var adapter: ChatListAdapter
+
+    private var firstRun = true
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -51,6 +57,8 @@ class ChatListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (::adapter.isInitialized) return
+
         setHasOptionsMenu(true)
 
         viewBinding.newChatFab.setOnClickListener {
@@ -86,12 +94,8 @@ class ChatListFragment : Fragment() {
             })
         }
 
-
-        viewBinding.chatListRecycler.adapter = ChatListAdapter(
-            requireActivity(),
-            emptyList(),
-            viewModel
-        ) {}
+        adapter = ChatListAdapter(requireActivity(), emptyList(), ::openChat)
+        viewBinding.chatListRecycler.adapter = adapter
         viewBinding.chatListRecycler.layoutManager = LinearLayoutManager(requireContext())
 
         val dividerItemDecoration = DividerItemDecoration(
@@ -100,6 +104,7 @@ class ChatListFragment : Fragment() {
         )
         viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
 
+        Log.e("pnCreated", hashCode().toString())
     }
 
     override fun onResume() {
@@ -130,8 +135,8 @@ class ChatListFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-
         viewModel.allChats().observe(viewLifecycleOwner) {
+            Log.e("viewChange", "aaa")
             if (it.isEmpty()) {
                 viewBinding.emptyTextView.visibility = View.VISIBLE
                 viewBinding.chatListRecycler.visibility = View.GONE
@@ -140,16 +145,11 @@ class ChatListFragment : Fragment() {
                 viewBinding.chatListRecycler.visibility = View.VISIBLE
             }
 
-            viewBinding.chatListRecycler.adapter = ChatListAdapter(
-                requireActivity(),
-                it,
-                viewModel,
-                ::openChat
-            )
+            adapter.data = it
         }
     }
 
-    private fun openChat(chat: Chat) {
+    private fun openChat(chat: ChatView) {
         navigationCoordinator.navigateTo(
             ChatListFragmentDirections.actionChatListFragmentToChatFragment(chat)
         )

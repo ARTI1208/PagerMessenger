@@ -3,6 +3,7 @@ package ru.art2000.pager.ui.fragments.chat
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.RelativeLayout
@@ -22,6 +23,7 @@ import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatViewModel
 import kotlin.concurrent.thread
+import kotlin.system.measureTimeMillis
 
 class ChatFragment : Fragment() {
 
@@ -54,95 +56,121 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewBinding.messagesListRecycler.layoutManager =
-            LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
+        val setupTime = measureTimeMillis {
+            viewBinding.messagesListRecycler.layoutManager =
+                LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
 
-        messagesAdapter = MessagesListAdapter(requireContext(), emptyList(), viewModel.getMessageActions(args.chat))
-        viewBinding.messagesListRecycler.adapter = messagesAdapter
+            messagesAdapter = MessagesListAdapter(
+                requireContext(),
+                emptyList(),
+                viewModel.getMessageActions(args.chatView)
+            )
+            viewBinding.messagesListRecycler.adapter = messagesAdapter
 
-        viewModel.allMessages(args.chat).observe(viewLifecycleOwner) {
-            messagesAdapter.setNewData(it)
-            if (it.isNotEmpty()) {
-                viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
+            viewModel.allMessages(args.chatView).observe(viewLifecycleOwner) {
+                val newDataTime = measureTimeMillis {
+                    messagesAdapter.setNewData(it)
+                    if (it.isNotEmpty()) {
+                        viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
+                    }
+                }
+                Log.e("TimeMeas2", newDataTime.toString())
             }
         }
+
+        Log.e("TimeMeas1", setupTime.toString())
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        thread {
-            val title = viewModel.getAddressee(args.chat).let {
-                if (it == null) return@let args.chat.addresseeNumber.toString()
+        val activCretaed = measureTimeMillis {
+            updateActionBar()
 
-                it.toDisplayName()
+            val lastMessage = args.chatView.lastMessage
+            if (lastMessage?.isDraft == true) {
+                viewBinding.messageEt.text.append(lastMessage.text)
+                viewBinding.invertPolarityCb.isChecked = lastMessage.invert
+                viewBinding.typeSwitch.isChecked = lastMessage.alpha
+
+                val toneRbToSelect = when (lastMessage.tone) {
+                    AntennaCommunicator.Tone.A -> viewBinding.toneARadio.id
+                    AntennaCommunicator.Tone.B -> viewBinding.toneBRadio.id
+                    AntennaCommunicator.Tone.C -> viewBinding.toneCRadio.id
+                    AntennaCommunicator.Tone.D -> viewBinding.toneDRadio.id
+                }
+
+                viewBinding.toneGroup.check(toneRbToSelect)
+
+                val freqRbToSelect = when (lastMessage.frequency) {
+                    AntennaCommunicator.Frequency.F512 -> viewBinding.freq512Radio.id
+                    AntennaCommunicator.Frequency.F1200 -> viewBinding.freq1200Radio.id
+                    AntennaCommunicator.Frequency.F2400 -> viewBinding.freq2400Radio.id
+                }
+
+                viewBinding.freqGroup.check(freqRbToSelect)
             }
-            requireCompatActivity().supportActionBar?.title = title
+
+            viewBinding.messageEt.addTextChangedListener(object : TextWatcherAdapter() {
+                override fun afterTextChanged(s: Editable) {
+                    saveMessage(s.toString(), false)
+                }
+            })
+
+            viewBinding.sendButton.setOnClickListener {
+                val text = viewBinding.messageEt.text.toString()
+                if (text.isEmpty()) {
+                    Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                saveMessage(text, true)
+
+                viewBinding.messageEt.text.clear()
+            }
+
+            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
+                saveMessage(viewBinding.messageEt.text.toString(), false)
+            }
+
+            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
+                saveMessage(viewBinding.messageEt.text.toString(), false)
+            }
+
+            viewBinding.toneGroup.setOnCheckedChangeListener { _, _ ->
+                saveMessage(viewBinding.messageEt.text.toString(), false)
+            }
+
+            viewBinding.freqGroup.setOnCheckedChangeListener { _, _ ->
+                saveMessage(viewBinding.messageEt.text.toString(), false)
+            }
+
+            val behaviour = BottomSheetBehavior.from(viewBinding.sendLayout)
+            behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    val params =
+                        viewBinding.messagesListRecycler.layoutParams as RelativeLayout.LayoutParams
+                    params.bottomMargin =
+                        ((bottomSheet.height - behaviour.peekHeight) * slideOffset).toInt() + behaviour.peekHeight
+                    viewBinding.messagesListRecycler.layoutParams = params
+                }
+
+            })
+
+
+            viewBinding.sendSettingsButton.setOnClickListener {
+                if (behaviour.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                } else {
+                    behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+                }
+            }
         }
-
-        viewBinding.sendButton.setOnClickListener {
-            val text = viewBinding.messageEt.text.toString()
-            if (text.isEmpty()) {
-                Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val tone = when (viewBinding.toneGroup.checkedRadioButtonId) {
-                viewBinding.toneBRadio.id -> AntennaCommunicator.Tone.B
-                viewBinding.toneCRadio.id -> AntennaCommunicator.Tone.C
-                viewBinding.toneDRadio.id -> AntennaCommunicator.Tone.D
-                else -> AntennaCommunicator.Tone.A
-            }
-
-            val frequency = when (viewBinding.freqGroup.checkedRadioButtonId) {
-                viewBinding.freq512Radio.id -> AntennaCommunicator.Frequency.F512
-                viewBinding.freq1200Radio.id -> AntennaCommunicator.Frequency.F1200
-                else -> AntennaCommunicator.Frequency.F2400
-            }
-
-            val sendResult = viewModel.sendMessage(
-                args.chat,
-                text,
-                tone,
-                frequency,
-                viewBinding.invertPolarityCb.isChecked,
-                viewBinding.typeSwitch.isChecked
-            )
-
-            when (sendResult) {
-                -2 -> Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT)
-                    .show()
-                -1 -> Toast.makeText(requireContext(), "Error sending data", Toast.LENGTH_SHORT)
-                    .show()
-            }
-
-            viewBinding.messageEt.text.clear()
-        }
-
-        val behaviour = BottomSheetBehavior.from(viewBinding.sendLayout)
-        behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                val params =
-                    viewBinding.messagesListRecycler.layoutParams as RelativeLayout.LayoutParams
-                params.bottomMargin =
-                    ((bottomSheet.height - behaviour.peekHeight) * slideOffset).toInt() + behaviour.peekHeight
-                viewBinding.messagesListRecycler.layoutParams = params
-            }
-
-        })
-
-
-        viewBinding.sendSettingsButton.setOnClickListener {
-            if (behaviour.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                behaviour.state = BottomSheetBehavior.STATE_EXPANDED
-            } else {
-                behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
-            }
-        }
+        Log.e("TimeMeas3", activCretaed.toString())
     }
 
     override fun onResume() {
@@ -159,13 +187,9 @@ class ChatFragment : Fragment() {
 
         if (item.itemId == R.id.rename_addressee) {
             val addresseeInput = EditText(requireContext())
-            thread {
-                viewModel.getAddressee(args.chat)?.apply {
-                    addresseeInput.hint = nickname ?: ""
-                    addresseeInput.text.append(nickname ?: "")
-                    addresseeInput.selectAll()
-                }
-            }
+            addresseeInput.hint = args.chatView.addressee.nickname ?: ""
+            addresseeInput.text.append(addresseeInput.hint)
+            addresseeInput.selectAll()
 
             val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(R.string.dialog_rename_chat_title)
@@ -174,11 +198,9 @@ class ChatFragment : Fragment() {
                 .setPositiveButton(R.string.dialog_rename_chat_ok_button) { dialog, _ ->
                     dialog.dismiss()
 
+                    updateActionBar("${addresseeInput.text} (${args.chatView.addressee.number})")
                     thread {
-                        viewModel.renameAddressee(args.chat, addresseeInput.text.toString())
-                        requireActivity().runOnUiThread {
-                            updateActionBar()
-                        }
+                        viewModel.renameAddressee(args.chatView.addressee, addresseeInput.text.toString())
                     }
                 }.create()
 
@@ -196,24 +218,44 @@ class ChatFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun updateActionBar() {
-
-
-        thread {
-            val title = viewModel.getAddressee(args.chat).let {
-                if (it == null) return@let args.chat.addresseeNumber.toString()
-
-                it.toDisplayName()
-            }
-
-            requireActivity().runOnUiThread {
-                requireCompatActivity().supportActionBar?.title = title
-            }
-        }
+    private fun updateActionBar(newTitle: String = args.chatView.addressee.toDisplayName()) {
+        requireCompatActivity().supportActionBar?.title = newTitle
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    private fun saveMessage(text: String, sendToPager: Boolean) {
 
+        val tone = when (viewBinding.toneGroup.checkedRadioButtonId) {
+            viewBinding.toneBRadio.id -> AntennaCommunicator.Tone.B
+            viewBinding.toneCRadio.id -> AntennaCommunicator.Tone.C
+            viewBinding.toneDRadio.id -> AntennaCommunicator.Tone.D
+            else -> AntennaCommunicator.Tone.A
+        }
+
+        val frequency = when (viewBinding.freqGroup.checkedRadioButtonId) {
+            viewBinding.freq512Radio.id -> AntennaCommunicator.Frequency.F512
+            viewBinding.freq1200Radio.id -> AntennaCommunicator.Frequency.F1200
+            else -> AntennaCommunicator.Frequency.F2400
+        }
+
+        if (sendToPager) {
+            viewModel.sendMessage(
+                args.chatView.addressee.number,
+                text,
+                tone,
+                frequency,
+                viewBinding.invertPolarityCb.isChecked,
+                viewBinding.typeSwitch.isChecked
+            )
+
+        } else {
+            viewModel.saveDraft(
+                args.chatView,
+                text,
+                tone,
+                frequency,
+                viewBinding.invertPolarityCb.isChecked,
+                viewBinding.typeSwitch.isChecked
+            )
+        }
     }
 }

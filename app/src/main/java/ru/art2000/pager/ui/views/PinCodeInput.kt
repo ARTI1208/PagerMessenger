@@ -3,15 +3,20 @@ package ru.art2000.pager.ui.views
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginBottom
+import androidx.core.view.marginRight
+import androidx.core.view.updatePadding
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.PinInputLayoutBinding
 
-class PinCodeInput(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+class PinCodeInput(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
         const val MIN_NUMBER_COUNT = 4
@@ -51,20 +56,15 @@ class PinCodeInput(context: Context, attrs: AttributeSet?, defStyleAttr: Int, de
     constructor(context: Context): this(context, null)
 
     init {
-        orientation = VERTICAL
-
-        dotsLayout.orientation = HORIZONTAL
-        dotsLayout.layoutParams = LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 60)
-
-        repeat(MIN_NUMBER_COUNT) {
-            dotsLayout.addView(createDotView(dotNoInput))
-        }
-
-        addView(dotsLayout)
 
         val pinBinding = PinInputLayoutBinding.inflate(LayoutInflater.from(context))
-        addView(pinBinding.root)
+        addView(pinBinding.root, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        pinBinding.root.layoutParams = (pinBinding.root.layoutParams as LayoutParams).apply {
+            addRule(ALIGN_PARENT_BOTTOM)
+            addRule(CENTER_HORIZONTAL)
+        }
+
+        updatePadding(bottom = context.resources.getDimensionPixelSize(R.dimen.pin_pad_bottom_margin))
 
         val numButtons = listOf(
             pinBinding.pad0, pinBinding.pad1, pinBinding.pad2, pinBinding.pad3, pinBinding.pad4,
@@ -97,25 +97,47 @@ class PinCodeInput(context: Context, attrs: AttributeSet?, defStyleAttr: Int, de
         }
 
         setBiometricVisible(false)
+
+
+
+        dotsLayout.gravity = Gravity.CENTER
+        dotsLayout.orientation = LinearLayout.HORIZONTAL
+        dotsLayout.layoutParams = LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 60).apply {
+            addRule(ABOVE, pinBinding.pinPadRoot.id)
+            bottomMargin = context.resources.getDimensionPixelSize(R.dimen.pin_pad_top_margin)
+        }
+
+        calculateDots(false)
+
+        addView(dotsLayout)
     }
 
     private fun inputToString() = input.joinToString("")
 
-    private fun createDotView(drawable: Drawable): ImageView {
+    private fun createDotView(drawable: Drawable, withMargin: Boolean = true): ImageView {
         return ImageView(context).apply {
             setImageDrawable(drawable)
-            layoutParams = LayoutParams(40, 40)
+            layoutParams = MarginLayoutParams(40, 40).apply {
+                if (withMargin) {
+                    rightMargin = 40
+                }
+            }
         }
     }
 
     private fun calculateDots(addOneMoreDot: Boolean = false) {
         dotsLayout.removeAllViews()
+
+        val totalDotsCount = input.size.coerceAtLeast(MIN_NUMBER_COUNT) +
+                if (addOneMoreDot && input.size in MIN_NUMBER_COUNT until MAX_NUMBER_COUNT) 1 else 0
+
         repeat(input.size) {
-            dotsLayout.addView(createDotView(dotWithInput))
+            dotsLayout.addView(createDotView(dotWithInput, it < totalDotsCount - 1))
         }
 
         for (i in input.size until MIN_NUMBER_COUNT) {
-            dotsLayout.addView(createDotView(dotNoInput))
+            dotsLayout.addView(createDotView(dotNoInput, i < totalDotsCount - 1))
         }
 
         if (addOneMoreDot && input.size in MIN_NUMBER_COUNT until MAX_NUMBER_COUNT) {

@@ -1,5 +1,6 @@
 package ru.art2000.pager.db
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -10,6 +11,9 @@ interface AddresseeDao {
 
     @Query("SELECT * FROM addressees")
     fun all(): List<Addressee>
+
+    @Query("SELECT * FROM addressees")
+    fun liveAll(): LiveData<List<Addressee>>
 
     @Query("SELECT * FROM addressees WHERE number = :number")
     fun byNumber(number: Int): Addressee?

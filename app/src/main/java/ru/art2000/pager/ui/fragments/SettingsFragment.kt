@@ -3,6 +3,7 @@ package ru.art2000.pager.ui.fragments
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
@@ -13,18 +14,20 @@ import ru.art2000.pager.R
 import ru.art2000.pager.extensions.SecureSharedPreferences
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.ui.NavigationCoordinator
+import kotlin.system.measureTimeMillis
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
     private lateinit var navigationCoordinator: NavigationCoordinator
 
-    private lateinit var encryptedPreferences: SharedPreferences
+    private val encryptedPreferences: SharedPreferences by lazy {
+        SecureSharedPreferences.create(requireContext(), "credentials_preferences")
+    }
 
     private var pinPreference: SwitchPreference? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        encryptedPreferences = SecureSharedPreferences.create(context, "credentials_preferences")
         navigationCoordinator = context as NavigationCoordinator
     }
 
@@ -57,6 +60,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         navigationCoordinator.navController.currentBackStackEntry?.savedStateHandle
             ?.getLiveData<Int>("pin_set")?.observe(viewLifecycleOwner) { result ->
                 pinPreference?.isChecked = result >= 0
@@ -72,7 +76,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun openPinCreator() {
-        navigationCoordinator.navigateTo(SettingsFragmentDirections.actionSettingsFragmentToPinCreatorFragment())
+        navigationCoordinator.navigateTo(SettingsFragmentDirections.actionSettingsFragmentToPinCreatorFragment(null))
     }
 
     private fun openBiometricPrompt(biometricPreference: SwitchPreference) {

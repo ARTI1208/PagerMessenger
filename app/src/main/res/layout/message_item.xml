@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:paddingHorizontal="10dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
+        android:orientation="vertical"
         android:id="@+id/message_card"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="end"
         android:layout_marginVertical="5dp"
         android:layout_marginStart="@dimen/message_card_min_horizontal_margin"
-        android:backgroundTint="@color/colorPrimary"
-        app:cardCornerRadius="10dp">
+        android:minWidth="80dp"
+        android:minHeight="36dp"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="6dp"
+        android:background="@drawable/message_background">
 
-        <LinearLayout
+        <TextView
+            tools:text="very very long message fkjgfkjgkljfgjkfkjgfjg rlkjgjkrgj rjklrgjkrjgkr jkgrjgrkljgkrgkrjglkrjg"
+            android:id="@+id/text_tv"
+            android:minWidth="80dp"
+            android:layout_gravity="center_vertical|start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:orientation="vertical">
+            style="@style/MessageTextStyle"/>
 
-
-            <TextView
-                android:id="@+id/text_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:id="@+id/error_image"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="end"
-                android:src="@drawable/ic_message_failed"
-                android:visibility="gone" />
-
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        <ImageView
+            android:id="@+id/error_image"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="bottom|end"
+            android:src="@drawable/ic_message_failed"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+    </LinearLayout>
 </FrameLayout>

@@ -12,7 +12,11 @@
         <action
             android:id="@+id/action_loginFragment_to_chatListFragment"
             app:destination="@id/chatListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
             app:launchSingleTop="true"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/login"
             app:popUpToInclusive="true" />
     </fragment>
@@ -23,35 +27,40 @@
         tools:layout="@layout/chat_list_fragment">
         <action
             android:id="@+id/action_chatListFragment_to_chatFragment"
-            app:destination="@id/chatFragment" />
+            app:destination="@id/chatFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_chatListFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
             app:launchSingleTop="true"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/chatListFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
         android:name="ru.art2000.pager.ui.fragments.chat.ChatFragment"
         android:label="ChatFragment" >
-        <action
-            android:id="@+id/action_chatFragment_to_chatListFragment"
-            app:destination="@id/chatListFragment" />
         <argument
-            android:name="chat"
-            app:argType="ru.art2000.pager.models.Chat" />
+            android:name="chatView"
+            app:argType="ru.art2000.pager.models.ChatView" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="ru.art2000.pager.ui.fragments.SettingsFragment"
         android:label="SettingsFragment" >
         <action
-            android:id="@+id/action_settingsFragment_to_chatListFragment"
-            app:destination="@id/chatListFragment"
-            app:launchSingleTop="true" />
-        <action
             android:id="@+id/action_settingsFragment_to_pinCreatorFragment"
-            app:destination="@id/pinCreatorFragment" />
+            app:destination="@id/pinCreatorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <argument
             android:name="pin_set"
             app:argType="boolean"
@@ -61,8 +70,18 @@
         android:id="@+id/pinCreatorFragment"
         android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment"
         android:label="PinCreatorFragment" >
+        <argument
+            android:name="check"
+            app:argType="string"
+            app:nullable="true" />
         <action
-            android:id="@+id/action_pinCreatorFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_pinCreatorFragment_self"
+            app:destination="@id/pinCreatorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/settingsFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 </navigation>

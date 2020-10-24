@@ -19,6 +19,8 @@
     <string name="dialog_new_chat_ok_button">Create/Open</string>
     <string name="dialog_new_chat_cancel_button" translatable="false">@string/cancel</string>
 
+    <string name="chat_item_draft">Draft</string>
+
     <!--Chat-->
     <string name="message_input_hint">Your message</string>
     <string name="message_setting_invert_polarity">Invert polarity</string>
