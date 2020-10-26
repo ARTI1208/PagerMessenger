@@ -142,7 +142,6 @@ class ChatListFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         viewModel.allChats().observe(viewLifecycleOwner) {
-            Log.e("viewChange", "aaa")
             if (it.isEmpty()) {
                 viewBinding.emptyTextView.visibility = View.VISIBLE
                 viewBinding.chatListRecycler.visibility = View.GONE

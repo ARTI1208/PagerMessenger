@@ -46,10 +46,8 @@ abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
     public open fun insertOrUpdateDraft(message: Message) {
         if (!message.isDraft) return
         val messageId = if (getDraftForChat(message.chatId) == null) {
-            Log.e("draftUpdate", "no prev draft for chat ${message.chatId}")
             insertMessage(message)
         } else {
-            Log.e("draftUpdate", "found prev version ${message.chatId}")
             updateDraft(message.chatId, message.text, message.settings, message.time)
             getDraftForChat(message.chatId)?.id!!
         }

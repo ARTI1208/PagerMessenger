@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -24,29 +26,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:behavior_peekHeight="@dimen/message_input_collapsed_height"
+            tools:behavior_peekHeight="400dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <View
-                android:background="#ffeeeeee"
                 android:layout_width="match_parent"
-                android:layout_height="1dp" />
-            <!--            <com.google.android.material.card.MaterialCardView-->
-            <!--                android:id="@+id/card_wrapper"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_marginStart="@dimen/bottom_view_horizontal_margin"-->
-            <!--                android:layout_marginTop="@dimen/bottom_view_vertical_margin"-->
-            <!--                android:layout_marginEnd="@dimen/bottom_view_horizontal_margin"-->
-            <!--                android:layout_marginBottom="@dimen/bottom_view_vertical_margin"-->
-            <!--                app:cardBackgroundColor="?floatingBottomBarBackground"-->
-            <!--                app:cardCornerRadius="@dimen/bottom_view_corner_radius"-->
-            <!--                app:cardUseCompatPadding="true"-->
-            <!--                app:cardElevation="@dimen/bottom_view_elevation"-->
-            <!--                app:elevation="@dimen/bottom_view_elevation"-->
-            <!--                app:strokeColor="?strokeColor"-->
-            <!--                app:strokeWidth="@dimen/bottom_view_stroke_width"-->
-            <!--                tools:ignore="PrivateResource">-->
-            <!--            </com.google.android.material.card.MaterialCardView>-->
+                android:layout_height="1dp"
+                android:background="#ffeeeeee" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -64,8 +50,9 @@
                 <EditText
                     android:id="@+id/message_et"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="@null"
                     android:hint="@string/message_input_hint" />
 
                 <ImageButton
@@ -77,130 +64,132 @@
                     android:src="@drawable/ic_send_message" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="1dp"
+                android:background="#ffeeeeee" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="@dimen/message_settings_vertical_margin"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin">
 
                 <CheckBox
                     android:id="@+id/invert_polarity_cb"
-                    android:layout_width="wrap_content"
+                    style="@style/MessageSettingsCheckBox"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
                     android:text="@string/message_setting_invert_polarity" />
 
                 <CheckBox
                     android:id="@+id/type_switch"
-                    android:checked="true"
-                    android:layout_width="wrap_content"
+                    style="@style/MessageSettingsCheckBox"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:text="@string/message_setting_invert_alpha" />
 
             </LinearLayout>
 
             <TextView
-                android:text="@string/message_setting_tone"
-                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:text="@string/message_setting_tone" />
 
             <RadioGroup
                 android:id="@+id/tone_group"
-                android:orientation="horizontal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:layout_marginVertical="@dimen/message_settings_vertical_margin"
+                android:gravity="center"
+                android:orientation="horizontal">
 
                 <RadioButton
-                    android:checked="true"
                     android:id="@+id/tone_a_radio"
-                    android:text="A"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="A" />
 
                 <RadioButton
                     android:id="@+id/tone_b_radio"
-                    android:text="B"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
+                    android:layout_weight="1"
+                    android:text="B" />
 
                 <RadioButton
                     android:id="@+id/tone_c_radio"
-                    android:text="C"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
+                    android:layout_weight="1"
+                    android:text="C" />
 
                 <RadioButton
                     android:id="@+id/tone_d_radio"
-                    android:text="D"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="D" />
             </RadioGroup>
 
             <TextView
-                android:text="@string/message_setting_frequency"
-                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:text="@string/message_setting_frequency" />
 
             <RadioGroup
                 android:id="@+id/freq_group"
-                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
-                android:layout_marginBottom="@dimen/message_settings_vertical_margin"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/message_settings_horizontal_margin"
+                android:layout_marginVertical="@dimen/message_settings_vertical_margin"
+                android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/freq_512_radio"
-                    android:text="512"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
+                    android:layout_weight="1"
+                    android:text="512" />
 
                 <RadioButton
                     android:id="@+id/freq_1200_radio"
-                    android:text="1200"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/message_settings_horizontal_margin"
+                    android:layout_weight="1"
+                    android:text="1200" />
 
                 <RadioButton
                     android:id="@+id/freq_2400_radio"
-                    android:checked="true"
-                    android:text="2400"
-                    android:layout_weight="1"
+                    style="@style/MessageSettingsRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="2400" />
 
             </RadioGroup>
-
-
-<!--            <Spinner-->
-<!--                android:id="@+id/tone_spinner"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:entries="@array/pager_tones" />-->
-
-<!--            <Spinner-->
-<!--                android:id="@+id/frequency_spinner"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:entries="@array/pager_frequencies" />-->
-
 
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
