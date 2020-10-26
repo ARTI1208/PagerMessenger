@@ -2,13 +2,18 @@ package ru.art2000.pager.ui.fragments.chat
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.ResultReceiver
 import android.text.Editable
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -20,10 +25,12 @@ import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.hardware.AntennaCommunicator
+import ru.art2000.pager.models.Addressee
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatViewModel
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
+
 
 class ChatFragment : Fragment() {
 
@@ -31,6 +38,7 @@ class ChatFragment : Fragment() {
     private lateinit var navigationCoordinator: NavigationCoordinator
 
     private val args: ChatFragmentArgs by navArgs()
+    private lateinit var addressee: Addressee
 
     private val viewModel: ChatViewModel by activityViewModels {
         ViewModelProvider.AndroidViewModelFactory(
@@ -55,6 +63,8 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        addressee = args.chatView.addressee
 
         val setupTime = measureTimeMillis {
             viewBinding.messagesListRecycler.layoutManager =
@@ -187,9 +197,8 @@ class ChatFragment : Fragment() {
 
         if (item.itemId == R.id.rename_addressee) {
             val addresseeInput = EditText(requireContext())
-            addresseeInput.hint = args.chatView.addressee.nickname ?: ""
+            addresseeInput.hint = addressee.nickname ?: ""
             addresseeInput.text.append(addresseeInput.hint)
-            addresseeInput.selectAll()
 
             val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(R.string.dialog_rename_chat_title)
@@ -198,12 +207,22 @@ class ChatFragment : Fragment() {
                 .setPositiveButton(R.string.dialog_rename_chat_ok_button) { dialog, _ ->
                     dialog.dismiss()
 
-                    updateActionBar("${addresseeInput.text} (${args.chatView.addressee.number})")
+                    addressee = Addressee(addressee.number, addresseeInput.text.toString())
+                    updateActionBar()
+
                     thread {
-                        viewModel.renameAddressee(args.chatView.addressee, addresseeInput.text.toString())
+                        viewModel.renameAddressee(
+                            args.chatView.addressee,
+                            addresseeInput.text.toString()
+                        )
                     }
                 }.create()
 
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+            dialog.setOnShowListener {
+                addresseeInput.requestFocus()
+                addresseeInput.selectAll()
+            }
 
             dialog.show()
 
@@ -218,7 +237,7 @@ class ChatFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun updateActionBar(newTitle: String = args.chatView.addressee.toDisplayName()) {
+    private fun updateActionBar(newTitle: String = addressee.toDisplayName()) {
         requireCompatActivity().supportActionBar?.title = newTitle
     }
 

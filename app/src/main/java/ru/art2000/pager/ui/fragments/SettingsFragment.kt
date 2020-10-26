@@ -3,7 +3,6 @@ package ru.art2000.pager.ui.fragments
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
@@ -14,7 +13,6 @@ import ru.art2000.pager.R
 import ru.art2000.pager.extensions.SecureSharedPreferences
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.ui.NavigationCoordinator
-import kotlin.system.measureTimeMillis
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -43,7 +41,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         pinPreference = findPreference("use_pin_code")
         pinPreference?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
-                openPinCreator()
+                openPinSetup()
             }
             true
         }
@@ -75,8 +73,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
     }
 
-    private fun openPinCreator() {
-        navigationCoordinator.navigateTo(SettingsFragmentDirections.actionSettingsFragmentToPinCreatorFragment(null))
+    private fun openPinSetup(check: String? = null) {
+        navigationCoordinator.navigateTo(SettingsFragmentDirections.actionSettingsFragmentToPinCreatorFragment(check))
     }
 
     private fun openBiometricPrompt(biometricPreference: SwitchPreference) {
