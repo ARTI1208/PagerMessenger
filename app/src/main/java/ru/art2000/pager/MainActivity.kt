@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import ru.art2000.pager.databinding.MainActivityBinding
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
 import ru.art2000.pager.receivers.usbReceiver
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity(), NavigationCoordinator {
     }
 
     private fun setup() {
+        val config = AppBarConfiguration.Builder(R.id.login, R.id.chatListFragment).build()
+        setupActionBarWithNavController(navigationController, config)
+
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter)
     }
@@ -41,14 +46,5 @@ class MainActivity : AppCompatActivity(), NavigationCoordinator {
 
     override fun navigateTo(direction: NavDirections) {
         navController.navigate(direction)
-    }
-
-    override fun setSupportsBack(supports: Boolean) {
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(supports)
-            if (supports) {
-                show()
-            }
-        }
     }
 }

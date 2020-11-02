@@ -1,31 +1,21 @@
 package ru.art2000.pager.ui.fragments.appselect
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.AppSelectingFragmentBinding
-import ru.art2000.pager.extensions.requireCompatActivity
-import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.AppListViewModel
 
 class AppsSelectFragment : Fragment() {
 
     private lateinit var viewBinding: AppSelectingFragmentBinding
-    private lateinit var navigationCoordinator: NavigationCoordinator
 
     private val viewModel: AppListViewModel by viewModels()
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        navigationCoordinator = context as NavigationCoordinator
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,7 +28,7 @@ class AppsSelectFragment : Fragment() {
     @SuppressLint("QueryPermissionsNeeded")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setHasOptionsMenu(true)
 
         viewBinding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -73,15 +63,6 @@ class AppsSelectFragment : Fragment() {
                 }
 
             })
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setHasOptionsMenu(true)
-        navigationCoordinator.setSupportsBack(true)
-        requireCompatActivity().supportActionBar?.apply {
-            setTitle(R.string.app_select_title)
         }
     }
 

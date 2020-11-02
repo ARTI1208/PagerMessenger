@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/securitySettingsFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.SecuritySettingsFragment"
-        android:label="SecuritySettingsFragment" >
+        android:label="@string/security_category" >
         <action
             android:id="@+id/action_securitySettingsFragment_to_pinCreatorFragment"
             app:destination="@id/pinCreatorFragment"
@@ -20,7 +20,7 @@
     <fragment
         android:id="@+id/settingsRootFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.SettingsRootFragment"
-        android:label="SettingsRootFragment" >
+        android:label="@string/settings" >
         <action
             android:id="@+id/action_settingsRootFragment_to_securitySettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
@@ -39,7 +39,7 @@
     <fragment
         android:id="@+id/forwardingSettingsFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.ForwardingSettingsFragment"
-        android:label="ForwardingSettingsFragment" >
+        android:label="@string/notification_forwarding_category" >
         <action
             android:id="@+id/action_forwardingSettingsFragment_to_appsListeningSelectFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
@@ -58,8 +58,7 @@
 
     <fragment
         android:id="@+id/pinCreatorFragment"
-        android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment"
-        android:label="PinCreatorFragment" >
+        android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment">
         <argument
             android:name="check"
             app:argType="string"
@@ -77,11 +76,11 @@
     <fragment
         android:id="@+id/appsListeningSelectFragment"
         android:name="ru.art2000.pager.ui.fragments.appselect.AppsSelectFragment"
-        android:label="AppsListeningSelectFragment" />
+        android:label="@string/app_select_title" />
     <fragment
         android:id="@+id/chatListFragment2"
         android:name="ru.art2000.pager.ui.fragments.chatlist.ChatListFragment"
-        android:label="chat_list_fragment"
+        android:label="@string/select_chats_title"
         tools:layout="@layout/chat_list_fragment" >
         <argument
             android:name="isSelectMode"

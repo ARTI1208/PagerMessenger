@@ -8,6 +8,4 @@ interface NavigationCoordinator {
     val navController: NavController
 
     fun navigateTo(direction: NavDirections)
-
-    fun setSupportsBack(supports: Boolean)
 }

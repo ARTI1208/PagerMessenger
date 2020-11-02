@@ -1,6 +1,5 @@
 package ru.art2000.pager.ui.fragments.chatlist
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.view.*
@@ -16,9 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.internal.TextWatcherAdapter
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
-import ru.art2000.pager.extensions.requireCompatActivity
+import ru.art2000.pager.extensions.contextNavigationCoordinator
 import ru.art2000.pager.models.ChatView
-import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatListViewModel
 import kotlin.concurrent.thread
 
@@ -35,15 +33,9 @@ class ChatListFragment : Fragment() {
 
     private lateinit var viewBinding: ChatListFragmentBinding
 
-    private lateinit var navigationCoordinator: NavigationCoordinator
+    private val navigationCoordinator by contextNavigationCoordinator()
 
     private lateinit var adapter: ChatListAdapter
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        navigationCoordinator = context as NavigationCoordinator
-        navigationCoordinator.setSupportsBack(false)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -126,16 +118,6 @@ class ChatListFragment : Fragment() {
             LinearLayoutManager.VERTICAL
         )
         viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigationCoordinator.setSupportsBack(args.isSelectMode)
-        requireCompatActivity().supportActionBar?.apply {
-            show()
-            val titleRes = if (args.isSelectMode) R.string.select_chats_title else R.string.app_name
-            setTitle(titleRes)
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

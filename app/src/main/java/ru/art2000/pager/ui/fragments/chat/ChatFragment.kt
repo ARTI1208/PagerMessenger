@@ -1,11 +1,9 @@
 package ru.art2000.pager.ui.fragments.chat
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
 import android.view.*
-import android.widget.Checkable
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -22,7 +20,6 @@ import ru.art2000.pager.databinding.ChatFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.models.Addressee
-import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatViewModel
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
@@ -31,7 +28,6 @@ import kotlin.system.measureTimeMillis
 class ChatFragment : Fragment() {
 
     private lateinit var viewBinding: ChatFragmentBinding
-    private lateinit var navigationCoordinator: NavigationCoordinator
 
     private val args: ChatFragmentArgs by navArgs()
     private lateinit var addressee: Addressee
@@ -44,11 +40,6 @@ class ChatFragment : Fragment() {
 
     private lateinit var messagesAdapter: MessagesListAdapter
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        navigationCoordinator = context as NavigationCoordinator
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,6 +50,8 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         addressee = args.chatView.addressee
 
@@ -135,31 +128,11 @@ class ChatFragment : Fragment() {
                 viewBinding.messageEt.text.clear()
             }
 
-//            viewBinding.invertPolarityCb.setOnClickListener {
-//                (it as Checkable).toggle()
-//                saveMessage(viewBinding.messageEt.text.toString(), false)
-//            }
-//
-//            viewBinding.typeSwitch.setOnClickListener {
-//                (it as Checkable).toggle()
-//                saveMessage(viewBinding.messageEt.text.toString(), false)
-//            }
-
-//            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
-//                saveMessage(viewBinding.messageEt.text.toString(), false)
-//            }
-//
-//            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
-//                saveMessage(viewBinding.messageEt.text.toString(), false)
-//            }
-
             viewBinding.invertPolarityCb.setOnCheckedChangeListener {  _, value ->
-                Log.e("checkkk1", value.toString())
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 
             viewBinding.typeSwitch.setOnCheckedChangeListener { _, value ->
-                Log.e("checkkk2", value.toString())
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 
@@ -197,12 +170,6 @@ class ChatFragment : Fragment() {
             }
         }
         Log.e("TimeMeas3", activCretaed.toString())
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigationCoordinator.setSupportsBack(true)
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

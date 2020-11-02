@@ -1,6 +1,5 @@
 package ru.art2000.pager.ui.fragments.settings
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
@@ -11,8 +10,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import ru.art2000.pager.R
 import ru.art2000.pager.extensions.SecureSharedPreferences
-import ru.art2000.pager.extensions.requireCompatActivity
-import ru.art2000.pager.ui.NavigationCoordinator
+import ru.art2000.pager.extensions.contextNavigationCoordinator
 
 class SecuritySettingsFragment : PreferenceFragmentCompat() {
 
@@ -22,18 +20,7 @@ class SecuritySettingsFragment : PreferenceFragmentCompat() {
 
     private var pinPreference: SwitchPreference? = null
 
-    private lateinit var navigationCoordinator: NavigationCoordinator
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        navigationCoordinator = context as NavigationCoordinator
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigationCoordinator.setSupportsBack(true)
-        requireCompatActivity().supportActionBar?.title = preferenceScreen.title
-    }
+    private val navigationCoordinator by contextNavigationCoordinator()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.security_settings)
@@ -79,7 +66,9 @@ class SecuritySettingsFragment : PreferenceFragmentCompat() {
 
     private fun openPinSetup(check: String? = null) {
         navigationCoordinator.navigateTo(
-            SecuritySettingsFragmentDirections.actionSecuritySettingsFragmentToPinCreatorFragment(check)
+            SecuritySettingsFragmentDirections.actionSecuritySettingsFragmentToPinCreatorFragment(
+                check
+            )
         )
     }
 
