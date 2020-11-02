@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
+import ru.art2000.pager.BuildConfig
 import ru.art2000.pager.helpers.SettingsKeys.NOTIFICATION_FORWARDING_FROM_PACKAGES_KEY
 import ru.art2000.pager.models.AppInfo
 import java.text.Collator
@@ -127,10 +128,6 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun infoCorrespondsToFilter(fullInfo: ApplicationInfo): Boolean {
-        // Remove this app from list
-        if (fullInfo.packageName == getApplication<Application>().packageName) return false
-
-
         if (!showSystemApps
             && (fullInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
                     || fullInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0)) return false
@@ -140,16 +137,17 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
 
         if (onlyLaunchableApps && pm.getLaunchIntentForPackage(fullInfo.packageName) == null) return false
 
-        if (textFilter.isEmpty()) return true
-
-        return fullInfo.packageName.contains(textFilter, true)
-                || cache[fullInfo.packageName]?.title?.contains(textFilter, true) == true
+        return true
     }
 
     private fun labelCorrespondsToFilter(app: AppInfo): Boolean {
+        // Remove this app from list in release
+        if (!BuildConfig.DEBUG && app.packageName == getApplication<Application>().packageName) return false
+
         if (textFilter.isEmpty()) return true
 
-        return app.title.contains(textFilter, true)
+        return app.packageName.contains(textFilter, true)
+                || app.title.contains(textFilter, true)
     }
 
     private fun sortApps(apps: List<AppInfo>): List<AppInfo> {
