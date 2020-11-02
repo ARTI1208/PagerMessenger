@@ -16,8 +16,6 @@ class MainActivity : AppCompatActivity(), NavigationCoordinator {
     private lateinit var navigationController: NavController
     private lateinit var mainActivityBinding: MainActivityBinding
 
-    private var backNavDirection: NavDirections? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

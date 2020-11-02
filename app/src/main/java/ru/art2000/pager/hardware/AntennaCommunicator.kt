@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package ru.art2000.pager.hardware
 
 import android.app.PendingIntent

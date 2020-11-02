@@ -32,15 +32,17 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <argument
+            android:name="isSelectMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
-            android:id="@+id/action_chatListFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment"
+            android:id="@+id/action_chatListFragment_to_settings_navigation"
+            app:destination="@id/settings_navigation"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
-            app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/chatListFragment" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
@@ -50,38 +52,5 @@
             android:name="chatView"
             app:argType="ru.art2000.pager.models.ChatView" />
     </fragment>
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="ru.art2000.pager.ui.fragments.SettingsFragment"
-        android:label="SettingsFragment" >
-        <action
-            android:id="@+id/action_settingsFragment_to_pinCreatorFragment"
-            app:destination="@id/pinCreatorFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <argument
-            android:name="pin_set"
-            app:argType="boolean"
-            android:defaultValue="false" />
-    </fragment>
-    <fragment
-        android:id="@+id/pinCreatorFragment"
-        android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment"
-        android:label="PinCreatorFragment" >
-        <argument
-            android:name="check"
-            app:argType="string"
-            app:nullable="true" />
-        <action
-            android:id="@+id/action_pinCreatorFragment_self"
-            app:destination="@id/pinCreatorFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/settingsFragment"
-            app:popUpToInclusive="false" />
-    </fragment>
+    <include app:graph="@navigation/settings_navigation" />
 </navigation>

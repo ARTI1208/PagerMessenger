@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_navigation"
+    app:startDestination="@id/settingsRootFragment">
+
+    <fragment
+        android:id="@+id/securitySettingsFragment"
+        android:name="ru.art2000.pager.ui.fragments.settings.SecuritySettingsFragment"
+        android:label="SecuritySettingsFragment" >
+        <action
+            android:id="@+id/action_securitySettingsFragment_to_pinCreatorFragment"
+            app:destination="@id/pinCreatorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsRootFragment"
+        android:name="ru.art2000.pager.ui.fragments.settings.SettingsRootFragment"
+        android:label="SettingsRootFragment" >
+        <action
+            android:id="@+id/action_settingsRootFragment_to_securitySettingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:destination="@id/securitySettingsFragment" />
+        <action
+            android:id="@+id/action_settingsRootFragment_to_forwardingSettingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:destination="@id/forwardingSettingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/forwardingSettingsFragment"
+        android:name="ru.art2000.pager.ui.fragments.settings.ForwardingSettingsFragment"
+        android:label="ForwardingSettingsFragment" >
+        <action
+            android:id="@+id/action_forwardingSettingsFragment_to_appsListeningSelectFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:destination="@id/appsListeningSelectFragment" />
+        <action
+            android:id="@+id/action_forwardingSettingsFragment_to_chatListFragment2"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:destination="@id/chatListFragment2" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pinCreatorFragment"
+        android:name="ru.art2000.pager.ui.fragments.PinCreatorFragment"
+        android:label="PinCreatorFragment" >
+        <argument
+            android:name="check"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_pinCreatorFragment_self"
+            app:destination="@id/pinCreatorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/securitySettingsFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/appsListeningSelectFragment"
+        android:name="ru.art2000.pager.ui.fragments.appselect.AppsSelectFragment"
+        android:label="AppsListeningSelectFragment" />
+    <fragment
+        android:id="@+id/chatListFragment2"
+        android:name="ru.art2000.pager.ui.fragments.chatlist.ChatListFragment"
+        android:label="chat_list_fragment"
+        tools:layout="@layout/chat_list_fragment" >
+        <argument
+            android:name="isSelectMode"
+            app:argType="boolean"
+            android:defaultValue="true" />
+    </fragment>
+</navigation>

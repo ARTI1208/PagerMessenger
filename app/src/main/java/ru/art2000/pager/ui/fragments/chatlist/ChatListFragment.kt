@@ -3,23 +3,20 @@ package ru.art2000.pager.ui.fragments.chatlist
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.internal.TextWatcherAdapter
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
-import ru.art2000.pager.models.Chat
 import ru.art2000.pager.models.ChatView
 import ru.art2000.pager.ui.NavigationCoordinator
 import ru.art2000.pager.viewmodels.ChatListViewModel
@@ -34,13 +31,13 @@ class ChatListFragment : Fragment() {
         )
     }
 
+    private val args by navArgs<ChatListFragmentArgs>()
+
     private lateinit var viewBinding: ChatListFragmentBinding
 
     private lateinit var navigationCoordinator: NavigationCoordinator
 
     private lateinit var adapter: ChatListAdapter
-
-    private var firstRun = true
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -69,20 +66,21 @@ class ChatListFragment : Fragment() {
             addresseeInput.inputType =
                 EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
 
+            val okButtonRes = if (args.isSelectMode)
+                R.string.dialog_new_chat_button_create
+            else
+                R.string.dialog_new_chat_button_create_or_open
 
             val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(R.string.dialog_new_chat_title)
                 .setView(addresseeInput)
                 .setNegativeButton(R.string.dialog_new_chat_cancel_button) { dialog, _ -> dialog.cancel() }
-                .setPositiveButton(R.string.dialog_new_chat_ok_button) { dialog, _ ->
-                    dialog.dismiss()
-
+                .setPositiveButton(okButtonRes) { _, _ ->
                     thread {
                         val chat = viewModel.createChat(addresseeInput.text.toString().toInt())
-                        openChat(chat)
+
+                        if (!args.isSelectMode) openChat(chat)
                     }
-
-
                 }.create()
 
             dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
@@ -100,7 +98,26 @@ class ChatListFragment : Fragment() {
             })
         }
 
-        adapter = ChatListAdapter(requireActivity(), emptyList(), ::openChat)
+        if (args.isSelectMode) {
+            adapter = ChatListAdapter(
+                requireActivity(),
+                emptyList(),
+                { _, holder -> holder.viewBinding.itemSelectCheckBox.performClick() },
+                true,
+                viewModel::isChatSelected,
+                viewModel::onChatChecked
+            )
+        } else {
+            adapter = ChatListAdapter(
+                requireActivity(),
+                emptyList(),
+                { chatView, _ -> openChat(chatView) },
+                false,
+                { false },
+                { _, _ -> }
+            )
+        }
+
         viewBinding.chatListRecycler.adapter = adapter
         viewBinding.chatListRecycler.layoutManager = LinearLayoutManager(requireContext())
 
@@ -109,28 +126,29 @@ class ChatListFragment : Fragment() {
             LinearLayoutManager.VERTICAL
         )
         viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
-
-        Log.e("pnCreated", hashCode().toString())
     }
 
     override fun onResume() {
         super.onResume()
-        navigationCoordinator.setSupportsBack(false)
+        navigationCoordinator.setSupportsBack(args.isSelectMode)
         requireCompatActivity().supportActionBar?.apply {
             show()
-            setTitle(R.string.app_name)
+            val titleRes = if (args.isSelectMode) R.string.select_chats_title else R.string.app_name
+            setTitle(titleRes)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.chat_list_menu, menu)
+        if (!args.isSelectMode) {
+            inflater.inflate(R.menu.chat_list_menu, menu)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == R.id.settings_item) {
             navigationCoordinator.navigateTo(
-                ChatListFragmentDirections.actionChatListFragmentToSettingsFragment()
+                ChatListFragmentDirections.actionChatListFragmentToSettingsNavigation()
             )
             return true
         }
@@ -152,6 +170,11 @@ class ChatListFragment : Fragment() {
 
             adapter.data = it
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.onDestroy(args.isSelectMode)
     }
 
     private fun openChat(chat: ChatView) {

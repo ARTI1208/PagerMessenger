@@ -1,4 +1,4 @@
-package ru.art2000.pager.ui.fragments
+package ru.art2000.pager.ui.fragments.settings
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -14,15 +14,15 @@ import ru.art2000.pager.extensions.SecureSharedPreferences
 import ru.art2000.pager.extensions.requireCompatActivity
 import ru.art2000.pager.ui.NavigationCoordinator
 
-class SettingsFragment : PreferenceFragmentCompat() {
-
-    private lateinit var navigationCoordinator: NavigationCoordinator
+class SecuritySettingsFragment : PreferenceFragmentCompat() {
 
     private val encryptedPreferences: SharedPreferences by lazy {
         SecureSharedPreferences.create(requireContext(), "credentials_preferences")
     }
 
     private var pinPreference: SwitchPreference? = null
+
+    private lateinit var navigationCoordinator: NavigationCoordinator
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -32,11 +32,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         navigationCoordinator.setSupportsBack(true)
-        requireCompatActivity().supportActionBar?.setTitle(R.string.settings)
+        requireCompatActivity().supportActionBar?.title = preferenceScreen.title
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.settings)
+        addPreferencesFromResource(R.xml.security_settings)
 
         pinPreference = findPreference("use_pin_code")
         pinPreference?.setOnPreferenceChangeListener { _, newValue ->
@@ -59,6 +59,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupPinSaving()
+    }
+
+    private fun setupPinSaving() {
         navigationCoordinator.navController.currentBackStackEntry?.savedStateHandle
             ?.getLiveData<Int>("pin_set")?.observe(viewLifecycleOwner) { result ->
                 pinPreference?.isChecked = result >= 0
@@ -74,13 +78,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun openPinSetup(check: String? = null) {
-        navigationCoordinator.navigateTo(SettingsFragmentDirections.actionSettingsFragmentToPinCreatorFragment(check))
+        navigationCoordinator.navigateTo(
+            SecuritySettingsFragmentDirections.actionSecuritySettingsFragmentToPinCreatorFragment(check)
+        )
     }
 
     private fun openBiometricPrompt(biometricPreference: SwitchPreference) {
         val prompt = BiometricPrompt(this, object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                Toast.makeText(requireContext(), R.string.biometrics_check_failed, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    R.string.biometrics_check_failed,
+                    Toast.LENGTH_SHORT
+                ).show()
                 biometricPreference.isChecked = false
             }
 
@@ -100,5 +110,4 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         prompt.authenticate(promptInfo)
     }
-
 }

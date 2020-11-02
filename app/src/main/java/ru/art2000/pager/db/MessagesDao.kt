@@ -21,7 +21,7 @@ abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
     @Query("SELECT * FROM messages WHERE chatId = :id AND status != ${Message.STATUS_DRAFT} ORDER BY id DESC LIMIT 1")
     public abstract fun lastMessageForChat(id: Int): Message?
 
-    @Query("SELECT * FROM messages WHERE chatId = :id ORDER BY id DESC LIMIT 1")
+    @Query("SELECT * FROM messages WHERE chatId = :id AND text != '' ORDER BY id DESC LIMIT 1")
     public abstract fun lastMessageForChatWithDraft(id: Int): Message?
 
     @Insert

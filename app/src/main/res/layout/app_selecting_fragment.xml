@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="68dp" />
+
+    <com.google.android.material.progressindicator.ProgressIndicator
+        android:id="@+id/load_indicator"
+        style="@style/Widget.MaterialComponents.ProgressIndicator.Circular.Indeterminate"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:indeterminate="true" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/bottom_view_horizontal_margin"
+        android:layout_marginTop="@dimen/bottom_view_vertical_margin"
+        android:layout_marginEnd="@dimen/bottom_view_horizontal_margin"
+        android:layout_marginBottom="@dimen/bottom_view_vertical_margin"
+        app:cardBackgroundColor="@color/floatingBottomBarBackground"
+        app:cardCornerRadius="@dimen/bottom_view_corner_radius"
+        app:cardElevation="@dimen/bottom_view_elevation"
+        app:cardUseCompatPadding="true"
+        app:elevation="@dimen/bottom_view_elevation"
+        app:strokeWidth="@dimen/bottom_view_stroke_width"
+        tools:ignore="PrivateResource">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/floatingBottomBarBackground"
+            app:iconifiedByDefault="false"
+            app:queryBackground="@null"
+            app:queryHint="@string/menu_search"
+            app:searchHintIcon="@null"
+            app:searchIcon="@null">
+
+        </androidx.appcompat.widget.SearchView>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</FrameLayout>

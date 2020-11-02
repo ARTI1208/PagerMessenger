@@ -2,18 +2,14 @@ package ru.art2000.pager.ui.fragments.chat
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.ResultReceiver
 import android.text.Editable
 import android.util.Log
 import android.view.*
-import android.view.inputmethod.InputMethodManager
+import android.widget.Checkable
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -139,11 +135,31 @@ class ChatFragment : Fragment() {
                 viewBinding.messageEt.text.clear()
             }
 
-            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
+//            viewBinding.invertPolarityCb.setOnClickListener {
+//                (it as Checkable).toggle()
+//                saveMessage(viewBinding.messageEt.text.toString(), false)
+//            }
+//
+//            viewBinding.typeSwitch.setOnClickListener {
+//                (it as Checkable).toggle()
+//                saveMessage(viewBinding.messageEt.text.toString(), false)
+//            }
+
+//            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
+//                saveMessage(viewBinding.messageEt.text.toString(), false)
+//            }
+//
+//            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
+//                saveMessage(viewBinding.messageEt.text.toString(), false)
+//            }
+
+            viewBinding.invertPolarityCb.setOnCheckedChangeListener {  _, value ->
+                Log.e("checkkk1", value.toString())
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 
-            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
+            viewBinding.typeSwitch.setOnCheckedChangeListener { _, value ->
+                Log.e("checkkk2", value.toString())
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 

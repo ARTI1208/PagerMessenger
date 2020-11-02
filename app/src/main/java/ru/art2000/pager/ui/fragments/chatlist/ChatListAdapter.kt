@@ -1,37 +1,35 @@
 package ru.art2000.pager.ui.fragments.chatlist
 
-import android.app.Activity
+import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.R
-import ru.art2000.pager.databinding.ChatListItemBinding
-import ru.art2000.pager.models.Chat
+import ru.art2000.pager.databinding.CheckableChatListItemBinding
 import ru.art2000.pager.models.ChatView
-import ru.art2000.pager.models.Message
-import ru.art2000.pager.viewmodels.ChatListViewModel
-import kotlin.concurrent.thread
 
 class ChatListAdapter(
-    private val mActivity: Activity,
-    private var chats: List<ChatView>,
-    private val onChatClick: (ChatView) -> Unit
+    private val mContext: Context,
+    private var chatViews: List<ChatView>,
+    private val onChatClick: (ChatView, ChatItemViewHolder) -> Unit,
+    private val checkable: Boolean,
+    private val isChatChecked: (ChatView) -> Boolean,
+    private val onChatChecked: (ChatView, Boolean) -> Unit,
 ) : RecyclerView.Adapter<ChatListAdapter.ChatItemViewHolder>() {
 
-    public var data: List<ChatView>
-        get() = chats
+    var data: List<ChatView>
+        get() = chatViews
         set(value) { setNewData(value) }
 
     private fun setNewData(newChats: List<ChatView>) {
         val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
             override fun getOldListSize(): Int {
-                return chats.size
+                return chatViews.size
             }
 
             override fun getNewListSize(): Int {
@@ -39,11 +37,11 @@ class ChatListAdapter(
             }
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return chats[oldItemPosition].addressee.number == newChats[newItemPosition].addressee.number
+                return chatViews[oldItemPosition].addressee.number == newChats[newItemPosition].addressee.number
             }
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                val old = chats[oldItemPosition]
+                val old = chatViews[oldItemPosition]
                 val new = newChats[newItemPosition]
                 return old.addressee.nickname == new.addressee.nickname
                         && old.lastMessage?.text == new.lastMessage?.text
@@ -52,36 +50,57 @@ class ChatListAdapter(
 
         })
 
-        chats = newChats
+        chatViews = newChats
         result.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatItemViewHolder =
         ChatItemViewHolder(
-            ChatListItemBinding.inflate(LayoutInflater.from(mActivity), parent, false)
+            CheckableChatListItemBinding.inflate(LayoutInflater.from(mContext), parent, false)
         )
 
     override fun onBindViewHolder(holder: ChatItemViewHolder, position: Int) {
-        val chat = chats[position]
-
-        holder.viewBinding.addresseeTv.text = chat.addressee.toDisplayName()
-        holder.viewBinding.lastMessageTv.text = chat.lastMessage?.let {
-            if (it.isDraft) buildSpannedString {
-                append("${this@ChatListAdapter.mActivity.getString(R.string.chat_item_draft)}: ", StyleSpan(Typeface.ITALIC), 0)
-                append(it.text)
-            } else it.text
-        } ?: ""
+        val chatView = chatViews[position]
+        holder.bind(chatView)
     }
 
-    override fun getItemCount(): Int = chats.size
+    override fun getItemCount(): Int = chatViews.size
 
-    inner class ChatItemViewHolder(val viewBinding: ChatListItemBinding) :
+    inner class ChatItemViewHolder(val viewBinding: CheckableChatListItemBinding) :
         RecyclerView.ViewHolder(viewBinding.root) {
 
         init {
+            viewBinding.itemSelectCheckBox.visibility = if (checkable)
+                View.VISIBLE
+            else
+                View.GONE
+
             viewBinding.root.setOnClickListener {
-                onChatClick(chats[bindingAdapterPosition])
+                onChatClick(chatViews[bindingAdapterPosition], this)
             }
+        }
+
+        fun bind(chatView: ChatView) {
+            viewBinding.addresseeTv.text = chatView.addressee.toDisplayName()
+            viewBinding.lastMessageTv.text = getLastMessagePreview(chatView)
+
+            viewBinding.itemSelectCheckBox.apply {
+                setOnCheckedChangeListener(null)
+                isChecked = isChatChecked(chatView)
+                setOnCheckedChangeListener { _, isChecked ->
+                    onChatChecked(chatView, isChecked)
+                }
+            }
+
+        }
+
+        private fun getLastMessagePreview(chatView: ChatView): CharSequence = chatView.lastMessage?.let {
+            if (it.isDraft) buildSpannedString {
+                append("${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ", StyleSpan(Typeface.ITALIC), 0)
+                append(it.text)
+            } else it.text
+        } ?: buildSpannedString {
+            append(this@ChatListAdapter.mContext.getString(R.string.no_messages), StyleSpan(Typeface.ITALIC), 0)
         }
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/security_category" >
+    <SwitchPreference
+        android:key="use_pin_code"
+        android:title="@string/preference_pin_code_title" />
+
+    <SwitchPreference
+        android:key="use_biometrics"
+        android:dependency="use_pin_code"
+        android:title="@string/preference_biometrics_title" />
+</PreferenceScreen>

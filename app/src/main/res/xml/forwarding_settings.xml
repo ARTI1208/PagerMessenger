@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/notification_forwarding_category" >
+
+    <Preference
+        android:key="apps_to_listen"
+        android:title="@string/notification_forwarding_apps_to_listen" />
+
+    <Preference
+        android:key="forward_to_chats"
+        android:title="@string/notification_forwarding_forward_to_chats" />
+</PreferenceScreen>

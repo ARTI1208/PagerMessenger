@@ -4,6 +4,8 @@
     <string name="cancel">Отмена</string>
     <string name="ok">OK</string>
 
+    <string name="menu_search">Поиск</string>
+
     <!--Auth-->
     <string name="biometrics_auth_title">Вход в приложение пейджера</string>
     <string name="biometrics_auth_subtitle">Это нужно для проверки пользователя</string>
@@ -16,9 +18,12 @@
     <string name="empty_view_text">Нет сообщений</string>
 
     <string name="dialog_new_chat_title">Введите номер получателя</string>
-    <string name="dialog_new_chat_ok_button">Создать/Открыть</string>
+    <string name="dialog_new_chat_button_create_or_open">Создать/Открыть</string>
+    <string name="dialog_new_chat_button_create">Создать</string>
 
     <string name="chat_item_draft">Черновик</string>
+
+    <string name="select_chats_title">Выберите чаты</string>
 
     <!--Chat-->
     <string name="message_input_hint">Ваше сообщение</string>
@@ -33,8 +38,13 @@
 
     <string name="dialog_rename_chat_title">Введите новое имя получателя</string>
 
+    <string name="no_messages">Нет сообщений</string>
+
     <!--Settings-->
     <string name="settings">Настройки</string>
+
+    <string name="security_category">Безопасность</string>
+
     <string name="preference_pin_code_title">Вход по пин-коду</string>
     <string name="preference_biometrics_title">Вход с помощью биометрии</string>
     <string name="biometrics_setup_description">Или используйте только пин-код</string>
@@ -42,5 +52,16 @@
 
     <string name="pin_setup_title">Придумайте пин-код</string>
     <string name="pin_check_title">Повторите пин-код</string>
+
+    <string name="notification_forwarding_category">Пересылка уведомлений</string>
+
+    <string name="notification_forwarding_apps_to_listen">Выбор отслеживаемых приложений</string>
+    <string name="notification_forwarding_forward_to_chats">Пересылать в чаты..</string>
+
+    <!--App select-->
+    <string name="app_select_title">Выберите приложения</string>
+
+    <string name="menu_show_system_apps">Показывать системные</string>
+    <string name="menu_only_apps_with_launcher">Только открываемые</string>
 
 </resources>
