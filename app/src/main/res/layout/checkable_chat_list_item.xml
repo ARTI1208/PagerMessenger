@@ -19,14 +19,14 @@
         <TextView
             tools:text="12345670"
             android:id="@+id/addressee_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/ChatItemTitle"/>
 
         <TextView
             tools:text="Some message"
             android:id="@+id/last_message_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
