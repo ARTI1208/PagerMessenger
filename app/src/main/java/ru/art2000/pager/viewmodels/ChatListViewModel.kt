@@ -44,9 +44,9 @@ class ChatListViewModel(application: Application) : AndroidViewModel(application
             insertChat(Chat(addressee))
         }
 
-        val initialMessage = Message(0, addressee, "", status = Message.STATUS_DRAFT)
+        val initialMessage = Message(0, addressee, "", status = Message.STATUS_CHAT_CREATED)
         messagesTable(getApplication()) {
-            insertOrUpdateDraft(initialMessage)
+            safeInsertMessage(initialMessage)
         }
 
         return ChatView(Addressee(addressee), initialMessage)

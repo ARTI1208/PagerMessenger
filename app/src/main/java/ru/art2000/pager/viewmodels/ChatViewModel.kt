@@ -31,7 +31,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun allMessages(chat: ChatView): LiveData<List<Message>> {
-        return messagesTable(getApplication()) { liveAllByChatId(chat.addressee.number) }
+        return messagesTable(getApplication()) { liveAllVisibleByChatId(chat.addressee.number) }
     }
 
     private fun sendMessage(message: Message): Int = sendMessage(

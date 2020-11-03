@@ -9,11 +9,8 @@ import ru.art2000.pager.models.Message
 @Dao
 abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
 
-    @Query("SELECT * FROM messages WHERE chatId = :id AND status != ${Message.STATUS_DRAFT}")
-    public abstract fun allByChatId(id: Int): List<Message>
-
-    @Query("SELECT * FROM messages WHERE chatId = :id AND status != ${Message.STATUS_DRAFT}")
-    public abstract fun liveAllByChatId(id: Int): LiveData<List<Message>>
+    @Query("SELECT * FROM messages WHERE chatId = :id AND status >= ${Message.STATUS_SEND_ERROR}")
+    public abstract fun liveAllVisibleByChatId(id: Int): LiveData<List<Message>>
 
     @Query("SELECT * FROM messages WHERE id = :id")
     public abstract fun byMessageId(id: Int): Message?
@@ -21,7 +18,7 @@ abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
     @Query("SELECT * FROM messages WHERE chatId = :id AND status != ${Message.STATUS_DRAFT} ORDER BY id DESC LIMIT 1")
     public abstract fun lastMessageForChat(id: Int): Message?
 
-    @Query("SELECT * FROM messages WHERE chatId = :id AND text != '' ORDER BY id DESC LIMIT 1")
+    @Query("SELECT * FROM messages WHERE chatId = :id AND (text != '' OR status = ${Message.STATUS_CHAT_CREATED}) ORDER BY id DESC LIMIT 1")
     public abstract fun lastMessageForChatWithDraft(id: Int): Message?
 
     @Insert

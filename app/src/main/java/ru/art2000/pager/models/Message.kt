@@ -32,7 +32,12 @@ data class Message(
     ): this(id, chatId, text, AntennaCommunicator.encodeSettings(tone, frequency, invert, alpha).toInt(), status, time)
 
     companion object {
+
+        const val STATUS_CHAT_CREATED = -8
+
         const val STATUS_DRAFT = -7
+
+        const val STATUS_SEND_ERROR = -1
     }
 
     val isDraft: Boolean

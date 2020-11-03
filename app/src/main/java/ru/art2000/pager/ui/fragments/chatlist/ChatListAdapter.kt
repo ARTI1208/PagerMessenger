@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.CheckableChatListItemBinding
 import ru.art2000.pager.models.ChatView
+import ru.art2000.pager.models.Message
 
 class ChatListAdapter(
     private val mContext: Context,
@@ -98,22 +99,29 @@ class ChatListAdapter(
 
         }
 
-        private fun getLastMessagePreview(chatView: ChatView): CharSequence =
-            chatView.lastMessage?.let {
-                if (it.isDraft) buildSpannedString {
-                    append(
-                        "${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ",
-                        StyleSpan(Typeface.ITALIC),
-                        0
-                    )
-                    append(it.text)
-                } else it.text
-            } ?: buildSpannedString {
+        private val noMessagesString: CharSequence
+            get() = buildSpannedString {
                 append(
                     this@ChatListAdapter.mContext.getString(R.string.no_messages),
                     StyleSpan(Typeface.ITALIC),
                     0
                 )
             }
+
+        private fun getLastMessagePreview(chatView: ChatView): CharSequence =
+            chatView.lastMessage?.let {
+                when (it.status) {
+                    Message.STATUS_DRAFT -> buildSpannedString {
+                        append(
+                            "${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ",
+                            StyleSpan(Typeface.ITALIC),
+                            0
+                        )
+                        append(it.text)
+                    }
+                    Message.STATUS_CHAT_CREATED -> noMessagesString
+                    else -> it.text
+                }
+            } ?: noMessagesString
     }
 }
