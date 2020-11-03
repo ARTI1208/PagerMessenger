@@ -18,10 +18,11 @@ import ru.art2000.pager.viewmodels.LoginViewModel
 
 class LoginFragment : Fragment() {
 
-    private lateinit var viewBinding: LoginFragmentBinding
+    private val viewModel: LoginViewModel by viewModels()
+
     private val navigationCoordinator by contextNavigationCoordinator()
 
-    private val viewModel: LoginViewModel by viewModels()
+    private lateinit var viewBinding: LoginFragmentBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +36,7 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (!viewModel.isSafeLogin()) {
-            navigationCoordinator.navigateTo(LoginFragmentDirections.actionLoginFragmentToChatListFragment())
+            gotoChatList()
             return
         }
 
@@ -62,8 +63,7 @@ class LoginFragment : Fragment() {
         pinView.onInput = verifier@{
             val asInt = it.toIntOrNull() ?: return@verifier false
             if (viewModel.loginWithPin(asInt)) {
-                Toast.makeText(requireContext(), "success", Toast.LENGTH_SHORT).show()
-                navigationCoordinator.navigateTo(LoginFragmentDirections.actionLoginFragmentToChatListFragment())
+                gotoChatList()
                 return@verifier true
             }
             false
@@ -86,7 +86,7 @@ class LoginFragment : Fragment() {
             }
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                navigationCoordinator.navigateTo(LoginFragmentDirections.actionLoginFragmentToChatListFragment())
+                gotoChatList()
             }
 
             override fun onAuthenticationFailed() {
@@ -106,5 +106,11 @@ class LoginFragment : Fragment() {
             .build()
 
         prompt.authenticate(promptInfo)
+    }
+
+    private fun gotoChatList() {
+        navigationCoordinator.navigateTo(
+            LoginFragmentDirections.actionLoginFragmentToChatListFragment()
+        )
     }
 }

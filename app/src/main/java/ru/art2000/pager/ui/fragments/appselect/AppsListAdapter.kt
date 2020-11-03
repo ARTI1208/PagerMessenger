@@ -2,17 +2,20 @@ package ru.art2000.pager.ui.fragments.appselect
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.databinding.AppListItemBinding
 import ru.art2000.pager.models.AppInfo
-import ru.art2000.pager.viewmodels.AppListViewModel
 
 class AppsListAdapter(
     private val mContext: Context,
     private var apps: List<AppInfo>,
-    private val viewModel: AppListViewModel
+    private val isSelectMode: Boolean,
+    private val onItemClick: (AppInfo) -> Unit,
+    private val isPackageSelected: (AppInfo) -> Boolean,
+    private val selectPackage: (AppInfo, Boolean) -> Unit,
 ) : RecyclerView.Adapter<AppsListAdapter.AppItemViewHolder>() {
 
     fun setNewData(newApps: List<AppInfo>) {
@@ -52,19 +55,15 @@ class AppsListAdapter(
     override fun onBindViewHolder(holder: AppItemViewHolder, position: Int) {
         val appItem = apps[position]
 
-        val packageName = appItem.packageName
+        if (isSelectMode) {
+            holder.viewBinding.itemSelectCheckBox.setOnCheckedChangeListener(null)
 
-        holder.viewBinding.itemSelectCheckBox.setOnCheckedChangeListener(null)
-        holder.viewBinding.root.setOnClickListener(null)
+            holder.viewBinding.itemSelectCheckBox.isChecked =
+                isPackageSelected(appItem)
 
-        holder.viewBinding.itemSelectCheckBox.isChecked =
-            viewModel.isPackageSelectedForForwarding(packageName)
-
-        holder.viewBinding.itemSelectCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.savePackage(packageName, isChecked)
-        }
-        holder.viewBinding.root.setOnClickListener {
-            holder.viewBinding.itemSelectCheckBox.performClick()
+            holder.viewBinding.itemSelectCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                selectPackage(appItem, isChecked)
+            }
         }
 
         holder.viewBinding.appName.text = appItem.title
@@ -74,7 +73,23 @@ class AppsListAdapter(
 
     override fun getItemCount(): Int = apps.size
 
-    class AppItemViewHolder(
+    inner class AppItemViewHolder(
         val viewBinding: AppListItemBinding
-    ) : RecyclerView.ViewHolder(viewBinding.root)
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
+
+        init {
+            viewBinding.itemSelectCheckBox.visibility =
+                if (isSelectMode) View.VISIBLE else View.GONE
+            if (isSelectMode) {
+                viewBinding.root.setOnClickListener {
+                    viewBinding.itemSelectCheckBox.performClick()
+                }
+            } else {
+                viewBinding.root.setOnClickListener {
+                    onItemClick(apps[bindingAdapterPosition])
+                }
+            }
+        }
+
+    }
 }

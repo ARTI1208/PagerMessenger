@@ -1,27 +1,30 @@
 package ru.art2000.pager.viewmodels
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
-import androidx.core.content.edit
 import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.preference.PreferenceManager
+import com.google.common.collect.HashMultimap
 import ru.art2000.pager.BuildConfig
-import ru.art2000.pager.helpers.SettingsKeys.NOTIFICATION_FORWARDING_FROM_PACKAGES_KEY
+import ru.art2000.pager.extensions.set
 import ru.art2000.pager.models.AppInfo
+import java.io.FileNotFoundException
 import java.text.Collator
-import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
-class AppListViewModel(application: Application) : AndroidViewModel(application) {
+class ForwardingViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        const val DATA_FILE_NAME = "forwarding_settings"
+    }
 
     private val mAllApps = MutableLiveData<List<ApplicationInfo>>(emptyList())
     private val mFilteredApps = MutableLiveData<List<AppInfo>>(emptyList())
@@ -30,11 +33,12 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     private val mLoading = MutableLiveData(true)
     val loading get() = mLoading
 
+    private val appsRead = AtomicBoolean(false)
+
     private val cache = mutableMapOf<String, AppInfo>()
 
-    private val packages = mutableSetOf<String>()
+    private val chatPackageMapping = HashMultimap.create<Int, String>()
 
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     var textFilter: String = ""
         set(value) {
@@ -54,50 +58,64 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
             applyFilter(mAllApps.value!!)
         }
 
-    init {
-        readPackages()
-        Log.e("CreatingModel", "aaa")
+    fun isPackageSelectedForForwarding(addresseeId: Int, packageName: String): Boolean =
+        chatPackageMapping.containsEntry(addresseeId, packageName)
+
+    fun savePackage(addresseeId: Int, packageName: String, add: Boolean) {
+        if (add) {
+            chatPackageMapping[addresseeId] = packageName
+        } else {
+            chatPackageMapping.remove(addresseeId, packageName)
+        }
+    }
+
+    private fun readPackages() {
+        val inputStream = try {
+            getApplication<Application>().openFileInput(DATA_FILE_NAME)
+        } catch (e: FileNotFoundException) {
+            null
+        } ?: return
+
+        chatPackageMapping.clear()
+
+        inputStream.reader().use { reader ->
+            reader.forEachLine {
+                val split = it.split("=")
+                if (split.size != 2) return@forEachLine
+
+                val addresseeId = split.first().toIntOrNull() ?: return@forEachLine
+
+                chatPackageMapping[addresseeId] = split[1]
+            }
+        }
+    }
+
+    private fun writePackages() {
+        getApplication<Application>()
+            .openFileOutput(DATA_FILE_NAME, Context.MODE_PRIVATE)
+            .writer()
+            .use { writer ->
+                chatPackageMapping.entries().forEach {
+                    writer.write("${it.key}=${it.value}\n")
+                }
+            }
+    }
+
+    fun loadApps() {
+        if (appsRead.getAndSet(true)) return
+        readSettings()
 
         mAllApps.observeForever {
             applyFilter(it)
         }
 
         thread {
-            val pm = application.packageManager
+            val pm = getApplication<Application>().packageManager
             val allApps: List<ApplicationInfo> =
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .sortedBy { it.packageName }
 
             mAllApps.postValue(allApps)
         }
-    }
-
-    fun isPackageSelectedForForwarding(packageName: String): Boolean =
-        packages.contains(packageName)
-
-    fun savePackage(packageName: String, add: Boolean) {
-        if (add) {
-            packages.add(packageName)
-        } else {
-            packages.remove(packageName)
-        }
-    }
-
-    private fun readPackages() {
-        packages.addAll(prefs.getStringSet(NOTIFICATION_FORWARDING_FROM_PACKAGES_KEY, emptySet())!!)
-    }
-
-    fun writePackages() {
-        prefs.edit {
-            putStringSet(NOTIFICATION_FORWARDING_FROM_PACKAGES_KEY, packages)
-        }
-    }
-
-    fun cleanUp(lifecycleOwner: LifecycleOwner) {
-        packages.clear()
-
-        mFilteredApps.removeObservers(lifecycleOwner)
-        mFilteredApps.postValue(emptyList())
     }
 
     private fun loadAdditionalAppInfo(app: ApplicationInfo): AppInfo {
@@ -130,7 +148,8 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     private fun infoCorrespondsToFilter(fullInfo: ApplicationInfo): Boolean {
         if (!showSystemApps
             && (fullInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
-                    || fullInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0)) return false
+                    || fullInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0)
+        ) return false
 
         val context = getApplication<Application>()
         val pm = context.packageManager
@@ -177,4 +196,13 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun readSettings() {
+        readPackages()
+    }
+
+    fun onDestroy(isSelectMode: Boolean) {
+        if (!isSelectMode) return
+
+        writePackages()
+    }
 }

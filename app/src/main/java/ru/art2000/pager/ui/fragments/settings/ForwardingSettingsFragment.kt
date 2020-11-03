@@ -13,7 +13,7 @@ class ForwardingSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.forwarding_settings)
 
-        findPreference<Preference>("apps_to_listen")?.apply {
+        findPreference<Preference>("by_apps")?.apply {
             setOnPreferenceClickListener {
                 navigationCoordinator.navigateTo(
                     ForwardingSettingsFragmentDirections.actionForwardingSettingsFragmentToAppsListeningSelectFragment()
@@ -22,10 +22,12 @@ class ForwardingSettingsFragment : PreferenceFragmentCompat() {
             }
         }
 
-        findPreference<Preference>("forward_to_chats")?.apply {
+        findPreference<Preference>("by_chats")?.apply {
             setOnPreferenceClickListener {
                 navigationCoordinator.navigateTo(
-                    ForwardingSettingsFragmentDirections.actionForwardingSettingsFragmentToChatListFragment2()
+                    ForwardingSettingsFragmentDirections.actionForwardingSettingsFragmentToSelectChatFragment(
+                        null
+                    )
                 )
                 return@setOnPreferenceClickListener true
             }

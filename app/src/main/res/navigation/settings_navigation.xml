@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_navigation"
     app:startDestination="@id/settingsRootFragment">
 
     <fragment
         android:id="@+id/securitySettingsFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.SecuritySettingsFragment"
-        android:label="@string/security_category" >
+        android:label="@string/security_category">
         <action
             android:id="@+id/action_securitySettingsFragment_to_pinCreatorFragment"
             app:destination="@id/pinCreatorFragment"
@@ -20,40 +19,40 @@
     <fragment
         android:id="@+id/settingsRootFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.SettingsRootFragment"
-        android:label="@string/settings" >
+        android:label="@string/settings">
         <action
             android:id="@+id/action_settingsRootFragment_to_securitySettingsFragment"
+            app:destination="@id/securitySettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:destination="@id/securitySettingsFragment" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_settingsRootFragment_to_forwardingSettingsFragment"
+            app:destination="@id/forwardingSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:destination="@id/forwardingSettingsFragment" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/forwardingSettingsFragment"
         android:name="ru.art2000.pager.ui.fragments.settings.ForwardingSettingsFragment"
-        android:label="@string/notification_forwarding_category" >
+        android:label="@string/notification_forwarding_category">
         <action
             android:id="@+id/action_forwardingSettingsFragment_to_appsListeningSelectFragment"
+            app:destination="@id/appsListeningSelectFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:destination="@id/appsListeningSelectFragment" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_forwardingSettingsFragment_to_chatListFragment2"
+            android:id="@+id/action_forwardingSettingsFragment_to_selectChatFragment"
+            app:destination="@id/selectChatFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:destination="@id/chatListFragment2" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -76,15 +75,34 @@
     <fragment
         android:id="@+id/appsListeningSelectFragment"
         android:name="ru.art2000.pager.ui.fragments.appselect.AppsSelectFragment"
-        android:label="@string/app_select_title" />
-    <fragment
-        android:id="@+id/chatListFragment2"
-        android:name="ru.art2000.pager.ui.fragments.chatlist.ChatListFragment"
-        android:label="@string/select_chats_title"
-        tools:layout="@layout/chat_list_fragment" >
+        android:label="@string/app_select_by_chats_title">
         <argument
-            android:name="isSelectMode"
-            app:argType="boolean"
-            android:defaultValue="true" />
+            android:name="addresseeId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_appsListeningSelectFragment_to_selectChatFragment"
+            app:destination="@id/selectChatFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
+    <fragment
+        android:id="@+id/selectChatFragment"
+        android:name="ru.art2000.pager.ui.fragments.chatlist.SelectChatFragment"
+        android:label="SelectChatFragment">
+        <action
+            android:id="@+id/action_selectChatFragment_to_appsListeningSelectFragment"
+            app:destination="@id/appsListeningSelectFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <argument
+            android:name="appPackage"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
 </navigation>

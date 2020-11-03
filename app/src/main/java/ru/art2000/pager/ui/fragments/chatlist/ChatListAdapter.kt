@@ -24,7 +24,9 @@ class ChatListAdapter(
 
     var data: List<ChatView>
         get() = chatViews
-        set(value) { setNewData(value) }
+        set(value) {
+            setNewData(value)
+        }
 
     private fun setNewData(newChats: List<ChatView>) {
         val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -77,6 +79,8 @@ class ChatListAdapter(
 
             viewBinding.root.setOnClickListener {
                 onChatClick(chatViews[bindingAdapterPosition], this)
+
+                if (checkable) viewBinding.itemSelectCheckBox.performClick()
             }
         }
 
@@ -94,13 +98,22 @@ class ChatListAdapter(
 
         }
 
-        private fun getLastMessagePreview(chatView: ChatView): CharSequence = chatView.lastMessage?.let {
-            if (it.isDraft) buildSpannedString {
-                append("${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ", StyleSpan(Typeface.ITALIC), 0)
-                append(it.text)
-            } else it.text
-        } ?: buildSpannedString {
-            append(this@ChatListAdapter.mContext.getString(R.string.no_messages), StyleSpan(Typeface.ITALIC), 0)
-        }
+        private fun getLastMessagePreview(chatView: ChatView): CharSequence =
+            chatView.lastMessage?.let {
+                if (it.isDraft) buildSpannedString {
+                    append(
+                        "${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ",
+                        StyleSpan(Typeface.ITALIC),
+                        0
+                    )
+                    append(it.text)
+                } else it.text
+            } ?: buildSpannedString {
+                append(
+                    this@ChatListAdapter.mContext.getString(R.string.no_messages),
+                    StyleSpan(Typeface.ITALIC),
+                    0
+                )
+            }
     }
 }

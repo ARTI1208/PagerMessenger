@@ -23,7 +23,8 @@
 
     <string name="chat_item_draft">Черновик</string>
 
-    <string name="select_chats_title">Выберите чаты</string>
+    <string name="select_chats_by_chats_title">Выберите чат</string>
+    <string name="select_chats_by_apps_title">Выберите чаты</string>
 
     <!--Chat-->
     <string name="message_input_hint">Ваше сообщение</string>
@@ -55,11 +56,12 @@
 
     <string name="notification_forwarding_category">Пересылка уведомлений</string>
 
-    <string name="notification_forwarding_apps_to_listen">Выбор отслеживаемых приложений</string>
-    <string name="notification_forwarding_forward_to_chats">Пересылать в чаты..</string>
+    <string name="notification_forwarding_by_apps">Группировка по приложениям</string>
+    <string name="notification_forwarding_by_chats">Группировка по чатам</string>
 
     <!--App select-->
-    <string name="app_select_title">Выберите приложения</string>
+    <string name="app_select_by_apps_title">Выберите приложение</string>
+    <string name="app_select_by_chats_title">Выберите приложения</string>
 
     <string name="menu_show_system_apps">Показывать системные</string>
     <string name="menu_only_apps_with_launcher">Только открываемые</string>

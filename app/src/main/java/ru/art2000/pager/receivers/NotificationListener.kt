@@ -1,36 +1,55 @@
 package ru.art2000.pager.receivers
 
 import android.app.Notification
-import android.content.SharedPreferences
+import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import androidx.preference.PreferenceManager
-import ru.art2000.pager.helpers.SettingsKeys
+import com.google.common.collect.HashMultimap
+import ru.art2000.pager.extensions.set
 import ru.art2000.pager.helpers.sendMessageAndSave
+import ru.art2000.pager.viewmodels.ForwardingViewModel
+import java.io.FileNotFoundException
 
+//TODO remove apps from list after being uninstalled?
 class NotificationListener : NotificationListenerService() {
 
-    private val preferences: SharedPreferences by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+    override fun onListenerDisconnected() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            requestRebind(ComponentName(this, NotificationListener::class.java))
+        }
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val validPackages = preferences.getStringSet(
-            SettingsKeys.NOTIFICATION_FORWARDING_FROM_PACKAGES_KEY, emptySet()
-        ) ?: return
-        if (!validPackages.contains(sbn.packageName)) return
 
+        val inputStream = try {
+            openFileInput(ForwardingViewModel.DATA_FILE_NAME)
+        } catch (e: FileNotFoundException) {
+            null
+        } ?: return
 
-        val addresseeIds = preferences.getStringSet(
-            SettingsKeys.NOTIFICATION_FORWARDING_TO_CHATS_KEY, emptySet()
-        ) ?: return
+        val packageChatMapping = HashMultimap.create<String, Int>()
+
+        inputStream.reader().use { reader ->
+            reader.forEachLine {
+                val split = it.split("=")
+                if (split.size != 2) return@forEachLine
+
+                val addresseeId = split.first().toIntOrNull() ?: return@forEachLine
+
+                packageChatMapping[split[1]] = addresseeId
+            }
+        }
+
+        val addresseeIds = packageChatMapping[sbn.packageName] ?: return
         if (addresseeIds.isEmpty()) return
 
-        val title = sbn.notification.extras[Notification.EXTRA_TITLE];
-        val text = sbn.notification.extras[Notification.EXTRA_TEXT];
+        val title = sbn.notification.extras[Notification.EXTRA_TITLE]
+        val text = sbn.notification.extras[Notification.EXTRA_TEXT]
 
         val notificationAppInfo = try {
             packageManager.getApplicationInfo(sbn.packageName, 0)
-        } catch (e : PackageManager.NameNotFoundException) {
+        } catch (e: PackageManager.NameNotFoundException) {
             null
         }
 
@@ -39,9 +58,8 @@ class NotificationListener : NotificationListenerService() {
         else
             packageManager.getApplicationLabel(notificationAppInfo)
 
-        addresseeIds.forEach {
-            val intId = it.toIntOrNull() ?: return@forEach
-            sendMessageAndSave(this, intId, "*$notificationAppTitle* !$title! $text")
+        addresseeIds.forEach { id ->
+            sendMessageAndSave(this, id, "*$notificationAppTitle* !$title! $text")
         }
     }
 }

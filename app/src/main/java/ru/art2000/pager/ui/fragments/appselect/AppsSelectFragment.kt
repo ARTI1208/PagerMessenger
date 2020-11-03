@@ -6,16 +6,23 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.AppSelectingFragmentBinding
-import ru.art2000.pager.viewmodels.AppListViewModel
+import ru.art2000.pager.extensions.contextNavigationCoordinator
+import ru.art2000.pager.models.AppInfo
+import ru.art2000.pager.viewmodels.ForwardingViewModel
 
 class AppsSelectFragment : Fragment() {
 
-    private lateinit var viewBinding: AppSelectingFragmentBinding
+    private val args: AppsSelectFragmentArgs by navArgs()
+    private val viewModel: ForwardingViewModel by viewModels()
+    private val navigationCoordinator by contextNavigationCoordinator()
 
-    private val viewModel: AppListViewModel by viewModels()
+    private val isSelectMode: Boolean inline get() = args.addresseeId >= 0
+
+    private lateinit var viewBinding: AppSelectingFragmentBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,14 +35,31 @@ class AppsSelectFragment : Fragment() {
     @SuppressLint("QueryPermissionsNeeded")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val title =
+            if (isSelectMode) R.string.app_select_by_chats_title
+            else R.string.app_select_by_apps_title
+
+        navigationCoordinator.setWindowTitle(title)
         setHasOptionsMenu(true)
+
+        viewModel.loadApps()
 
         viewBinding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val appsListAdapter = AppsListAdapter(
             requireContext(),
             emptyList(),
-            viewModel
+            isSelectMode,
+            ::showChatsForApp,
+            { viewModel.isPackageSelectedForForwarding(args.addresseeId, it.packageName) },
+            { app, isChecked ->
+                viewModel.savePackage(
+                    args.addresseeId,
+                    app.packageName,
+                    isChecked
+                )
+            },
         )
 
         viewBinding.recyclerView.adapter = appsListAdapter
@@ -47,7 +71,7 @@ class AppsSelectFragment : Fragment() {
         }
 
         viewModel.apps.observe(viewLifecycleOwner) {
-            (viewBinding.recyclerView.adapter as AppsListAdapter).setNewData(it)
+            appsListAdapter.setNewData(it)
         }
 
         viewBinding.searchView.apply {
@@ -86,13 +110,15 @@ class AppsSelectFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        viewModel.writePackages()
+        viewModel.onDestroy(isSelectMode)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.cleanUp(this)
-        viewModelStore.clear()
+    private fun showChatsForApp(appInfo: AppInfo) {
+        navigationCoordinator.navigateTo(
+            AppsSelectFragmentDirections.actionAppsListeningSelectFragmentToSelectChatFragment(
+                appInfo.packageName
+            )
+        )
     }
 
 }

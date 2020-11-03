@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatListFragment"
-        android:name="ru.art2000.pager.ui.fragments.chatlist.ChatListFragment"
+        android:name="ru.art2000.pager.ui.fragments.chatlist.MainChatListFragment"
         android:label="@string/app_name"
         tools:layout="@layout/chat_list_fragment">
         <action
@@ -32,10 +32,6 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <argument
-            android:name="isSelectMode"
-            app:argType="boolean"
-            android:defaultValue="false" />
         <action
             android:id="@+id/action_chatListFragment_to_settings_navigation"
             app:destination="@id/settings_navigation"
@@ -51,5 +47,6 @@
             android:name="chatView"
             app:argType="ru.art2000.pager.models.ChatView" />
     </fragment>
+
     <include app:graph="@navigation/settings_navigation" />
 </navigation>

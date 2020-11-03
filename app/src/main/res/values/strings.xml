@@ -24,7 +24,8 @@
 
     <string name="chat_item_draft">Draft</string>
 
-    <string name="select_chats_title">Select chats</string>
+    <string name="select_chats_by_chats_title">Select chat</string>
+    <string name="select_chats_by_apps_title">Select chats</string>
 
     <!--Chat-->
     <string name="message_input_hint">Your message</string>
@@ -58,11 +59,12 @@
 
     <string name="notification_forwarding_category">Notification forwarding</string>
 
-    <string name="notification_forwarding_apps_to_listen">Select apps to listen</string>
-    <string name="notification_forwarding_forward_to_chats">Select chats to forward to</string>
+    <string name="notification_forwarding_by_apps">Group by apps</string>
+    <string name="notification_forwarding_by_chats">Group by chats</string>
 
     <!--App select-->
-    <string name="app_select_title">Select apps</string>
+    <string name="app_select_by_apps_title">Select app</string>
+    <string name="app_select_by_chats_title">Select apps</string>
 
     <string name="menu_show_system_apps">Show system apps</string>
     <string name="menu_only_apps_with_launcher">Only apps with launcher</string>

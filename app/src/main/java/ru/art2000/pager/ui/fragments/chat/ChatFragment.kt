@@ -27,8 +27,6 @@ import kotlin.system.measureTimeMillis
 
 class ChatFragment : Fragment() {
 
-    private lateinit var viewBinding: ChatFragmentBinding
-
     private val args: ChatFragmentArgs by navArgs()
     private lateinit var addressee: Addressee
 
@@ -37,6 +35,8 @@ class ChatFragment : Fragment() {
             requireActivity().application
         )
     }
+
+    private lateinit var viewBinding: ChatFragmentBinding
 
     private lateinit var messagesAdapter: MessagesListAdapter
 
@@ -128,11 +128,11 @@ class ChatFragment : Fragment() {
                 viewBinding.messageEt.text.clear()
             }
 
-            viewBinding.invertPolarityCb.setOnCheckedChangeListener {  _, value ->
+            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 
-            viewBinding.typeSwitch.setOnCheckedChangeListener { _, value ->
+            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
                 saveMessage(viewBinding.messageEt.text.toString(), false)
             }
 
