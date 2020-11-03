@@ -67,6 +67,8 @@ class ChatFragment : Fragment() {
             viewBinding.messagesListRecycler.adapter = messagesAdapter
 
             viewModel.allMessages(args.chatView).observe(viewLifecycleOwner) {
+                viewBinding.emptyTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+
                 val newDataTime = measureTimeMillis {
                     messagesAdapter.setNewData(it)
                     if (it.isNotEmpty()) {

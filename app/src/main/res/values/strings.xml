@@ -15,7 +15,7 @@
     <string name="biometrics_check_failed">Biometrics check failed</string>
 
     <!--Chat list-->
-    <string name="empty_view_text">No chats</string>
+    <string name="empty_view_no_chats_text">No chats</string>
 
     <string name="dialog_new_chat_title">Input addressee</string>
     <string name="dialog_new_chat_button_create_or_open">Create/Open</string>
@@ -44,6 +44,7 @@
 
     <string name="no_messages">No messages</string>
 
+    <string name="empty_view_no_messages_text" translatable="false">@string/no_messages</string>
     <!--Settings-->
     <string name="settings">Settings</string>
 

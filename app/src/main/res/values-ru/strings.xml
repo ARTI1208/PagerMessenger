@@ -15,7 +15,7 @@
     <string name="biometrics_check_failed">Ошибка при проверке биометрии</string>
 
     <!--Chat list-->
-    <string name="empty_view_text">Нет сообщений</string>
+    <string name="empty_view_no_chats_text">Нет сообщений</string>
 
     <string name="dialog_new_chat_title">Введите номер получателя</string>
     <string name="dialog_new_chat_button_create_or_open">Создать/Открыть</string>

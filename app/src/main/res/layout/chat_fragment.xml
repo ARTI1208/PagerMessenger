@@ -13,6 +13,16 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="@dimen/message_input_collapsed_height" />
 
+    <TextView
+        android:id="@+id/empty_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/empty_view_no_messages_text"
+        android:visibility="gone"
+        android:layout_marginBottom="@dimen/message_input_collapsed_height"
+        tools:visibility="visible"/>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/send_layout_coordinator"
         android:layout_width="match_parent"
