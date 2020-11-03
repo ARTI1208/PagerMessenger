@@ -45,9 +45,6 @@ abstract class ChatListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (::adapter.isInitialized) return
 
-        val title = getTitleRes()
-
-        navigationCoordinator.setWindowTitle(title)
         setHasOptionsMenu(true)
 
         viewBinding.newChatFab.setOnClickListener {
@@ -91,6 +88,13 @@ abstract class ChatListFragment : Fragment() {
             LinearLayoutManager.VERTICAL
         )
         viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val title = getTitleRes()
+        navigationCoordinator.setWindowTitle(title)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
