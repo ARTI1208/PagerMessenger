@@ -162,7 +162,9 @@ class MainChatListFragment : ChatListFragment() {
         thread {
             val chat = viewModel.createChat(text.toInt())
 
-            openChat(chat)
+            requireActivity().runOnUiThread {
+                openChat(chat)
+            }
         }
     }
 
