@@ -1,6 +1,5 @@
 package ru.art2000.pager.db
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import ru.art2000.pager.models.Chat
@@ -28,13 +27,24 @@ abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
     public abstract fun deleteMessage(message: Message): Int
 
     @Query("UPDATE messages SET text = :newText, settings = :settings, time = :time WHERE chatId = :chatId AND status = ${Message.STATUS_DRAFT}")
-    protected abstract fun updateDraft(chatId: Int, newText: String, settings: Int, time: Long = System.currentTimeMillis())
+    protected abstract fun updateDraft(
+        chatId: Int,
+        newText: String,
+        settings: Int,
+        time: Long = System.currentTimeMillis()
+    )
+
+    @Query("SELECT * FROM messages WHERE chatId = :chatId AND status = ${Message.STATUS_CHAT_CREATED}")
+    protected abstract fun getChatCreatedMessage(chatId: Int): Message?
 
 //    @Insert(onConflict = OnConflictStrategy.REPLACE)
 //    protected abstract fun updateDraft2(chatId: Int, newText: String, settings: Int, time: Long = System.currentTimeMillis())
 
     @Query("SELECT * FROM messages WHERE chatId = :chatId AND status = ${Message.STATUS_DRAFT}")
     public abstract fun getDraftForChat(chatId: Int): Message?
+
+    @Query("DELETE FROM messages WHERE chatId = :chatId")
+    public abstract fun deleteAllMessages(chatId: Int): Int
 
     @Query("DELETE FROM messages WHERE chatId = :chatId AND status = ${Message.STATUS_DRAFT}")
     public abstract fun deleteDrafts(chatId: Int): Int
@@ -51,10 +61,25 @@ abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
         messagesDatabase.chatsDao().updateChat(Chat(message.chatId, messageId.toInt()))
     }
 
+    public open fun insertChatCreatedMessage(message: Message): Boolean {
+        if (message.status != Message.STATUS_CHAT_CREATED) return false
+
+        return if (getChatCreatedMessage(message.chatId) == null) {
+            val id = insertMessage(message)
+            messagesDatabase.chatsDao().updateChat(Chat(message.chatId, id.toInt()))
+            true
+        } else false
+    }
+
     @Transaction
     public open fun safeInsertMessage(message: Message) {
         if (message.isDraft) {
             insertOrUpdateDraft(message)
+            return
+        }
+
+        if (message.status == Message.STATUS_CHAT_CREATED) {
+            insertChatCreatedMessage(message)
             return
         }
 

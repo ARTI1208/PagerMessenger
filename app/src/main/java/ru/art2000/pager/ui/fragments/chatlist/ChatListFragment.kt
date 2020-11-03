@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,8 +30,8 @@ abstract class ChatListFragment : Fragment() {
 
     protected val navigationCoordinator by contextNavigationCoordinator()
 
-    private lateinit var viewBinding: ChatListFragmentBinding
-    private lateinit var adapter: ChatListAdapter
+    protected lateinit var viewBinding: ChatListFragmentBinding
+    protected lateinit var adapter: ChatListAdapter<*>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -100,7 +101,7 @@ abstract class ChatListFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel.allChats().observe(viewLifecycleOwner) {
+        viewModel.allChats().observe(viewLifecycleOwner, Observer {
             if (it.isEmpty()) {
                 viewBinding.emptyTextView.visibility = View.VISIBLE
                 viewBinding.chatListRecycler.visibility = View.GONE
@@ -110,10 +111,15 @@ abstract class ChatListFragment : Fragment() {
             }
 
             adapter.data = it
-        }
+
+            if (viewModel.shouldScrollToTop) {
+                viewBinding.chatListRecycler.smoothScrollToPosition(0)
+                viewModel.shouldScrollToTop = false
+            }
+        })
     }
 
-    abstract fun createListAdapter(): ChatListAdapter
+    abstract fun createListAdapter(): ChatListAdapter<*>
 
     @StringRes
     abstract fun getTitleRes(): Int
@@ -129,28 +135,48 @@ class MainChatListFragment : ChatListFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.chat_list_menu, menu)
+
+        viewModel.isSelectMode.observe(viewLifecycleOwner, Observer {
+            val settingsItem = menu.findItem(R.id.settings_item)
+            val deleteItem = menu.findItem(R.id.delete_item)
+            val cancelItem = menu.findItem(R.id.cancel_item)
+
+            settingsItem.isVisible = !it
+            deleteItem.isVisible = it
+            cancelItem.isVisible = it
+        })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        if (item.itemId == R.id.settings_item) {
-            navigationCoordinator.navigateTo(
-                MainChatListFragmentDirections.actionChatListFragmentToSettingsNavigation()
-            )
-            return true
+        when (item.itemId) {
+            R.id.settings_item -> {
+                navigationCoordinator.navigateTo(
+                    MainChatListFragmentDirections.actionChatListFragmentToSettingsNavigation()
+                )
+            }
+            R.id.delete_item -> {
+                viewModel.deleteSelectedChats()
+                (adapter as MainChatListAdapter).disableSelectMode()
+            }
+            R.id.cancel_item -> {
+                viewModel.onSelectModeCanceled()
+                (adapter as MainChatListAdapter).disableSelectMode()
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
+        return true
     }
 
-    override fun createListAdapter(): ChatListAdapter = ChatListAdapter(
+    override fun createListAdapter(): ChatListAdapter<*> = MainChatListAdapter(
         requireActivity(),
-        emptyList(),
         { chatView, _ -> openChat(chatView) },
-        false,
-        { false },
-        { _, _ -> },
+        viewModel::addOrRemoveChat,
+        viewModel.selectedChats::contains,
+        viewModel.selectedChats::size
     )
+
 
     @StringRes
     override fun getTitleRes(): Int = R.string.app_name
@@ -197,11 +223,10 @@ class SelectChatFragment : ChatListFragment() {
         forwardingViewModel.onDestroy(isPackageAlreadySelected)
     }
 
-    override fun createListAdapter(): ChatListAdapter {
+    override fun createListAdapter(): ChatListAdapter<*> {
         return if (isPackageAlreadySelected) {
-            ChatListAdapter(
+            ChatSelectListAdapter(
                 requireActivity(),
-                emptyList(),
                 { _, _ -> },
                 true,
                 {
@@ -219,9 +244,8 @@ class SelectChatFragment : ChatListFragment() {
                 },
             )
         } else {
-            ChatListAdapter(
+            ChatSelectListAdapter(
                 requireActivity(),
-                emptyList(),
                 { chatView, _ -> showAppsForChat(chatView) },
                 false,
                 { false },

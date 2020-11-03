@@ -1,33 +1,22 @@
 package ru.art2000.pager.ui.fragments.chatlist
 
 import android.content.Context
-import android.graphics.Typeface
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import ru.art2000.pager.R
 import ru.art2000.pager.databinding.CheckableChatListItemBinding
 import ru.art2000.pager.models.ChatView
-import ru.art2000.pager.models.Message
 
-class ChatListAdapter(
-    private val mContext: Context,
-    private var chatViews: List<ChatView>,
-    private val onChatClick: (ChatView, ChatItemViewHolder) -> Unit,
-    private val checkable: Boolean,
-    private val isChatChecked: (ChatView) -> Boolean,
-    private val onChatChecked: (ChatView, Boolean) -> Unit,
-) : RecyclerView.Adapter<ChatListAdapter.ChatItemViewHolder>() {
+abstract class ChatListAdapter<VH : ChatItemViewHolderBase<*>>(
+    protected val mContext: Context,
+) : RecyclerView.Adapter<VH>() {
+
+    private var chatViews: List<ChatView> = emptyList()
 
     var data: List<ChatView>
         get() = chatViews
-        set(value) {
-            setNewData(value)
-        }
+        set(value) = setNewData(value)
 
     private fun setNewData(newChats: List<ChatView>) {
         val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -57,71 +46,85 @@ class ChatListAdapter(
         result.dispatchUpdatesTo(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatItemViewHolder =
-        ChatItemViewHolder(
-            CheckableChatListItemBinding.inflate(LayoutInflater.from(mContext), parent, false)
-        )
-
-    override fun onBindViewHolder(holder: ChatItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: VH, position: Int) {
         val chatView = chatViews[position]
         holder.bind(chatView)
     }
 
     override fun getItemCount(): Int = chatViews.size
+}
 
-    inner class ChatItemViewHolder(val viewBinding: CheckableChatListItemBinding) :
-        RecyclerView.ViewHolder(viewBinding.root) {
+class MainChatListAdapter(
+    mContext: Context,
+    private val onChatClick: (ChatView, MainChatItemViewHolder) -> Unit,
+    private val reportSelect: (ChatView, Boolean) -> Unit,
+    private val isSelected: (ChatView) -> Boolean,
+    private val selectCount: () -> Int,
+) : ChatListAdapter<MainChatItemViewHolder>(mContext) {
 
-        init {
-            viewBinding.itemSelectCheckBox.visibility = if (checkable)
-                View.VISIBLE
-            else
-                View.GONE
+    companion object {
+        const val DEFAULT_MODE = 0
 
-            viewBinding.root.setOnClickListener {
-                onChatClick(chatViews[bindingAdapterPosition], this)
-
-                if (checkable) viewBinding.itemSelectCheckBox.performClick()
-            }
-        }
-
-        fun bind(chatView: ChatView) {
-            viewBinding.addresseeTv.text = chatView.addressee.toDisplayName()
-            viewBinding.lastMessageTv.text = getLastMessagePreview(chatView)
-
-            viewBinding.itemSelectCheckBox.apply {
-                setOnCheckedChangeListener(null)
-                isChecked = isChatChecked(chatView)
-                setOnCheckedChangeListener { _, isChecked ->
-                    onChatChecked(chatView, isChecked)
-                }
-            }
-
-        }
-
-        private val noMessagesString: CharSequence
-            get() = buildSpannedString {
-                append(
-                    this@ChatListAdapter.mContext.getString(R.string.no_messages),
-                    StyleSpan(Typeface.ITALIC),
-                    0
-                )
-            }
-
-        private fun getLastMessagePreview(chatView: ChatView): CharSequence =
-            chatView.lastMessage?.let {
-                when (it.status) {
-                    Message.STATUS_DRAFT -> buildSpannedString {
-                        append(
-                            "${this@ChatListAdapter.mContext.getString(R.string.chat_item_draft)}: ",
-                            StyleSpan(Typeface.ITALIC),
-                            0
-                        )
-                        append(it.text)
-                    }
-                    Message.STATUS_CHAT_CREATED -> noMessagesString
-                    else -> it.text
-                }
-            } ?: noMessagesString
+        const val SELECT_MODE = 1
     }
+
+    fun disableSelectMode() {
+        notifyItemRangeChanged(0, itemCount)
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (selectCount() == 0) return DEFAULT_MODE else SELECT_MODE
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainChatItemViewHolder =
+        MainChatItemViewHolder(
+            CheckableChatListItemBinding.inflate(LayoutInflater.from(mContext), parent, false),
+            { chatView, holder ->
+                if (viewType == DEFAULT_MODE) {
+                    onChatClick(chatView, holder)
+                } else {
+                    holder.viewBinding.itemSelectCheckBox.performClick()
+                }
+            },
+            { data[it] },
+            {
+                if (viewType == SELECT_MODE) return@MainChatItemViewHolder
+
+                val chatView = data[it.bindingAdapterPosition]
+
+                reportSelect(chatView, true)
+                notifyItemRangeChanged(0, itemCount)
+            },
+            { holder, isChecked ->
+
+                reportSelect(data[holder.bindingAdapterPosition], isChecked)
+                if (selectCount() == 0) {
+                    disableSelectMode()
+                }
+
+            },
+            viewType == SELECT_MODE,
+            isSelected
+        )
+
+}
+
+class ChatSelectListAdapter(
+    mContext: Context,
+    private val onChatClick: (ChatView, ChatSelectItemViewHolder) -> Unit,
+    private val checkable: Boolean,
+    private val isChatChecked: (ChatView) -> Boolean,
+    private val onChatChecked: (ChatView, Boolean) -> Unit,
+) : ChatListAdapter<ChatSelectItemViewHolder>(mContext) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatSelectItemViewHolder =
+        ChatSelectItemViewHolder(
+            CheckableChatListItemBinding.inflate(LayoutInflater.from(mContext), parent, false),
+            onChatClick,
+            { data[it] },
+            checkable,
+            isChatChecked,
+            onChatChecked
+        )
+
 }

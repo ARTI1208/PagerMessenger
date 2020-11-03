@@ -5,7 +5,7 @@ import androidx.room.*
 import ru.art2000.pager.models.Chat
 
 @Dao
-abstract class ChatsDao {
+abstract class ChatsDao(private val messagesDatabase: MessagesDatabase) {
 
     @Query("SELECT * FROM chats")
     abstract fun all(): List<Chat>
@@ -23,5 +23,15 @@ abstract class ChatsDao {
     abstract fun updateChat(chat: Chat): Int
 
     @Delete
-    abstract fun deleteChat(chat: Chat): Int
+    protected abstract fun deleteChats(chats: Collection<Chat>): Int
+
+    @Transaction
+    open fun deleteChatsAndMessages(chats: Collection<Chat>) {
+        deleteChats(chats)
+        messagesDatabase.messagesTable {
+            chats.forEach {
+                deleteAllMessages(it.addresseeNumber)
+            }
+        }
+    }
 }
