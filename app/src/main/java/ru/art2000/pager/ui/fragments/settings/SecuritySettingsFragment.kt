@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
 import androidx.preference.PreferenceFragmentCompat
@@ -39,6 +40,14 @@ class SecuritySettingsFragment : PreferenceFragmentCompat() {
                     openBiometricPrompt(this)
                 }
                 true
+            }
+
+            if (
+                BiometricManager.from(requireContext()).canAuthenticate(
+                    BiometricManager.Authenticators.BIOMETRIC_WEAK
+                ) != BiometricManager.BIOMETRIC_SUCCESS
+            ) {
+                preferenceScreen.removePreference(this)
             }
         }
     }

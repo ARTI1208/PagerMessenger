@@ -6,7 +6,7 @@ interface MessageAction {
 
     operator fun invoke(message: Message)
 
-    fun displayOnLongClick(message: Message): Boolean
+    fun displayOnSelect(message: Message): Boolean
 
     fun displayOnClick(message: Message): Boolean
 }

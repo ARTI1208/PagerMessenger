@@ -61,6 +61,13 @@
     <string name="notification_forwarding_by_apps">Группировка по приложениям</string>
     <string name="notification_forwarding_by_chats">Группировка по чатам</string>
 
+    <string name="notification_reading_permission_dialog_title">Разрешение на чтение уведомлений</string>
+    <string name="notification_reading_permission_dialog_message">Чтобы пересылать уведомления приложению необходимо разрешение на чтение уведомлений. Нажмите "OK" чтобы открыть настройки и переведите переключатель во включённое положение чтобы дать разрешение</string>
+
+    <string name="send_logs_title">Отправить логи</string>
+    <string name="send_logs_no_logs">Логи не найдены</string>
+    <string name="send_logs_apps_select_title">Выберите в какое приложение отправить</string>
+
     <!--App select-->
     <string name="app_select_by_apps_title">Выберите приложение</string>
     <string name="app_select_by_chats_title">Выберите приложения</string>

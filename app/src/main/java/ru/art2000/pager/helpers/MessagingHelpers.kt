@@ -1,6 +1,7 @@
 package ru.art2000.pager.helpers
 
 import android.content.Context
+import ru.art2000.pager.PagerApplication
 import ru.art2000.pager.db.messagesTable
 import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.models.Message
@@ -25,6 +26,11 @@ fun sendMessageAndSave(
         invert,
         alpha
     ).also {
+
+        if (it in Message.FIRST_ERROR_CODE..Message.LAST_ERROR_CODE) {
+            PagerApplication.Logger.log("Sending result: $it")
+        }
+
         thread {
             messagesTable(context) {
                 safeInsertMessage(

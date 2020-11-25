@@ -5,8 +5,6 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import com.google.common.collect.HashMultimap
-import ru.art2000.pager.extensions.set
 import ru.art2000.pager.helpers.sendMessageAndSave
 import ru.art2000.pager.viewmodels.ForwardingViewModel
 import java.io.FileNotFoundException
@@ -28,7 +26,7 @@ class NotificationListener : NotificationListenerService() {
             null
         } ?: return
 
-        val packageChatMapping = HashMultimap.create<String, Int>()
+        val addresseeIds = hashSetOf<Int>()
 
         inputStream.reader().use { reader ->
             reader.forEachLine {
@@ -37,11 +35,12 @@ class NotificationListener : NotificationListenerService() {
 
                 val addresseeId = split.first().toIntOrNull() ?: return@forEachLine
 
-                packageChatMapping[split[1]] = addresseeId
+                if (split[1] == sbn.packageName) {
+                    addresseeIds += addresseeId
+                }
             }
         }
 
-        val addresseeIds = packageChatMapping[sbn.packageName] ?: return
         if (addresseeIds.isEmpty()) return
 
         val title = sbn.notification.extras[Notification.EXTRA_TITLE]

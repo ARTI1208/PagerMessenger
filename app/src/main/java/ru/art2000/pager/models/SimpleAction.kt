@@ -11,7 +11,7 @@ class SimpleAction(
         return action(message)
     }
 
-    override fun displayOnLongClick(message: Message): Boolean {
+    override fun displayOnSelect(message: Message): Boolean {
         return longChecker(message)
     }
 

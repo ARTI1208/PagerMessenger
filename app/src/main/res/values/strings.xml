@@ -65,6 +65,13 @@
     <string name="notification_forwarding_by_apps">Group by apps</string>
     <string name="notification_forwarding_by_chats">Group by chats</string>
 
+    <string name="notification_reading_permission_dialog_title">Notification reading permission</string>
+    <string name="notification_reading_permission_dialog_message">To forward notification app requires notification reading permission to be granted. Click "OK" to open settings and toggle the switch on to grant permission</string>
+
+    <string name="send_logs_title">Send logs</string>
+    <string name="send_logs_no_logs">No logs yet</string>
+    <string name="send_logs_apps_select_title">Select app to send to</string>
+
     <!--App select-->
     <string name="app_select_by_apps_title">Select app</string>
     <string name="app_select_by_chats_title">Select apps</string>

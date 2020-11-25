@@ -2,7 +2,6 @@ package ru.art2000.pager.ui.fragments.chat
 
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.RelativeLayout
@@ -22,7 +21,6 @@ import ru.art2000.pager.hardware.AntennaCommunicator
 import ru.art2000.pager.models.Addressee
 import ru.art2000.pager.viewmodels.ChatViewModel
 import kotlin.concurrent.thread
-import kotlin.system.measureTimeMillis
 
 
 class ChatFragment : Fragment() {
@@ -55,123 +53,112 @@ class ChatFragment : Fragment() {
 
         addressee = args.chatView.addressee
 
-        val setupTime = measureTimeMillis {
-            viewBinding.messagesListRecycler.layoutManager =
-                LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
+        viewBinding.messagesListRecycler.layoutManager =
+            LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
 
-            messagesAdapter = MessagesListAdapter(
-                requireContext(),
-                emptyList(),
-                viewModel.getMessageActions(args.chatView)
-            )
-            viewBinding.messagesListRecycler.adapter = messagesAdapter
+        messagesAdapter = MessagesListAdapter(
+            requireContext(),
+            emptyList(),
+            viewModel.getMessageActions(args.chatView)
+        )
+        viewBinding.messagesListRecycler.adapter = messagesAdapter
 
-            viewModel.allMessages(args.chatView).observe(viewLifecycleOwner) {
-                viewBinding.emptyTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+        viewModel.allMessages(args.chatView).observe(viewLifecycleOwner) {
+            viewBinding.emptyTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
 
-                val newDataTime = measureTimeMillis {
-                    messagesAdapter.setNewData(it)
-                    if (it.isNotEmpty()) {
-                        viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
-                    }
-                }
-                Log.e("TimeMeas2", newDataTime.toString())
+            messagesAdapter.setNewData(it)
+            if (it.isNotEmpty()) {
+                viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
             }
         }
-
-        Log.e("TimeMeas1", setupTime.toString())
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val activCretaed = measureTimeMillis {
-            updateActionBar()
+        updateActionBar()
 
-            val lastMessage = args.chatView.lastMessage
-            if (lastMessage?.isDraft == true) {
-                viewBinding.messageEt.text.append(lastMessage.text)
-                viewBinding.invertPolarityCb.isChecked = lastMessage.invert
-                viewBinding.typeSwitch.isChecked = lastMessage.alpha
+        val lastMessage = args.chatView.lastMessage
+        if (lastMessage?.isDraft == true) {
+            viewBinding.messageEt.text.append(lastMessage.text)
+            viewBinding.invertPolarityCb.isChecked = lastMessage.invert
+            viewBinding.typeSwitch.isChecked = lastMessage.alpha
 
-                val toneRbToSelect = when (lastMessage.tone) {
-                    AntennaCommunicator.Tone.A -> viewBinding.toneARadio.id
-                    AntennaCommunicator.Tone.B -> viewBinding.toneBRadio.id
-                    AntennaCommunicator.Tone.C -> viewBinding.toneCRadio.id
-                    AntennaCommunicator.Tone.D -> viewBinding.toneDRadio.id
-                }
-
-                viewBinding.toneGroup.check(toneRbToSelect)
-
-                val freqRbToSelect = when (lastMessage.frequency) {
-                    AntennaCommunicator.Frequency.F512 -> viewBinding.freq512Radio.id
-                    AntennaCommunicator.Frequency.F1200 -> viewBinding.freq1200Radio.id
-                    AntennaCommunicator.Frequency.F2400 -> viewBinding.freq2400Radio.id
-                }
-
-                viewBinding.freqGroup.check(freqRbToSelect)
+            val toneRbToSelect = when (lastMessage.tone) {
+                AntennaCommunicator.Tone.A -> viewBinding.toneARadio.id
+                AntennaCommunicator.Tone.B -> viewBinding.toneBRadio.id
+                AntennaCommunicator.Tone.C -> viewBinding.toneCRadio.id
+                AntennaCommunicator.Tone.D -> viewBinding.toneDRadio.id
             }
 
-            viewBinding.messageEt.addTextChangedListener(object : TextWatcherAdapter() {
-                override fun afterTextChanged(s: Editable) {
-                    saveMessage(s.toString(), false)
-                }
-            })
+            viewBinding.toneGroup.check(toneRbToSelect)
 
-            viewBinding.sendButton.setOnClickListener {
-                val text = viewBinding.messageEt.text.toString()
-                if (text.isEmpty()) {
-                    Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                saveMessage(text, true)
-
-                viewBinding.messageEt.text.clear()
+            val freqRbToSelect = when (lastMessage.frequency) {
+                AntennaCommunicator.Frequency.F512 -> viewBinding.freq512Radio.id
+                AntennaCommunicator.Frequency.F1200 -> viewBinding.freq1200Radio.id
+                AntennaCommunicator.Frequency.F2400 -> viewBinding.freq2400Radio.id
             }
 
-            viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
-                saveMessage(viewBinding.messageEt.text.toString(), false)
+            viewBinding.freqGroup.check(freqRbToSelect)
+        }
+
+        viewBinding.messageEt.addTextChangedListener(object : TextWatcherAdapter() {
+            override fun afterTextChanged(s: Editable) {
+                saveMessage(s.toString(), false)
+            }
+        })
+
+        viewBinding.sendButton.setOnClickListener {
+            val text = viewBinding.messageEt.text.toString()
+            if (text.isEmpty()) {
+                Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
-            viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
-                saveMessage(viewBinding.messageEt.text.toString(), false)
+            saveMessage(text, true)
+
+            viewBinding.messageEt.text.clear()
+        }
+
+        viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.toneGroup.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.freqGroup.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        val behaviour = BottomSheetBehavior.from(viewBinding.sendLayout)
+        behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+
             }
 
-            viewBinding.toneGroup.setOnCheckedChangeListener { _, _ ->
-                saveMessage(viewBinding.messageEt.text.toString(), false)
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                val params =
+                    viewBinding.messagesListRecycler.layoutParams as RelativeLayout.LayoutParams
+                params.bottomMargin =
+                    ((bottomSheet.height - behaviour.peekHeight) * slideOffset).toInt() + behaviour.peekHeight
+                viewBinding.messagesListRecycler.layoutParams = params
             }
 
-            viewBinding.freqGroup.setOnCheckedChangeListener { _, _ ->
-                saveMessage(viewBinding.messageEt.text.toString(), false)
-            }
+        })
 
-            val behaviour = BottomSheetBehavior.from(viewBinding.sendLayout)
-            behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    val params =
-                        viewBinding.messagesListRecycler.layoutParams as RelativeLayout.LayoutParams
-                    params.bottomMargin =
-                        ((bottomSheet.height - behaviour.peekHeight) * slideOffset).toInt() + behaviour.peekHeight
-                    viewBinding.messagesListRecycler.layoutParams = params
-                }
-
-            })
-
-
-            viewBinding.sendSettingsButton.setOnClickListener {
-                if (behaviour.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                    behaviour.state = BottomSheetBehavior.STATE_EXPANDED
-                } else {
-                    behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
-                }
+        viewBinding.sendSettingsButton.setOnClickListener {
+            if (behaviour.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+            } else {
+                behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
-        Log.e("TimeMeas3", activCretaed.toString())
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

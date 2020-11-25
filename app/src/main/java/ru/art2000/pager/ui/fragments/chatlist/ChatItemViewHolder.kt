@@ -70,7 +70,6 @@ class MainChatItemViewHolder(
 ) : ChatItemViewHolderBase<MainChatItemViewHolder>(viewBinding, onChatClick, getChatView) {
 
     init {
-        Log.e("creating", checkable.toString())
         viewBinding.itemSelectCheckBox.visibility = if (checkable) View.VISIBLE else View.GONE
 
         if (checkable) {
@@ -92,8 +91,6 @@ class MainChatItemViewHolder(
         if (viewBinding.itemSelectCheckBox.visibility == View.VISIBLE) {
             viewBinding.itemSelectCheckBox.isChecked = isChatChecked(chatView)
         }
-
-        Log.e("binding", chatView.toString())
     }
 
 }

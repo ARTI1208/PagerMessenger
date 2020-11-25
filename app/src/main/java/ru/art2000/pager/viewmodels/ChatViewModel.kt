@@ -18,8 +18,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             SimpleAction(
                 R.string.message_action_resend,
                 { sendMessage(it) },
-                { it.status < 0 },
-                { it.status < 0 })
+                { it.isError },
+                { false })
         )
     }
 
