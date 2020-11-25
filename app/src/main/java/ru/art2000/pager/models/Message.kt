@@ -33,18 +33,32 @@ data class Message(
 
     companion object {
 
-        const val STATUS_CHAT_CREATED = -8
+        // Error codes
+        const val DRIVER_NOT_FOUND = -1
 
+        const val USB_PERMISSION_RESTRICTED = -2
+
+        const val DEVICE_OPEN_FAILED = -3
+
+        // Modifier codes
         const val STATUS_DRAFT = -7
 
-        const val STATUS_SEND_ERROR = -1
+        // Event codes
+        const val STATUS_CHAT_CREATED = -8
+
+        // Helpers
+        const val FIRST_ERROR_CODE = DEVICE_OPEN_FAILED
+
+        const val LAST_ERROR_CODE = DRIVER_NOT_FOUND
+
+        const val FIRST_VISIBLE_CODE = FIRST_ERROR_CODE
     }
 
     val isDraft: Boolean
         get() = status == STATUS_DRAFT
 
     val isError: Boolean
-        get() = status in -2..-1
+        get() = status in FIRST_ERROR_CODE..LAST_ERROR_CODE
 
     val isOk: Boolean
         get() = status >= 0

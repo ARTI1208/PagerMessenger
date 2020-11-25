@@ -7,12 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.util.Log
 import androidx.core.content.ContextCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import ru.art2000.pager.extensions.toInt
+import ru.art2000.pager.models.Message
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
 
 object AntennaCommunicator {
@@ -30,7 +30,8 @@ object AntennaCommunicator {
         tone: Tone,
         frequency: Frequency,
         invert: Boolean,
-        alpha: Boolean): Byte {
+        alpha: Boolean
+    ): Byte {
 
         return (-0x80 + 0x10 * tone.ordinal + 0x8 * alpha.toInt() + 0x2 * frequency.ordinal + 0x1 * invert.toInt()).toByte()
     }
@@ -64,16 +65,14 @@ object AntennaCommunicator {
         alpha: Boolean = true
     ): Int {
         val usbManager = ContextCompat.getSystemService(context, UsbManager::class.java)!!
-        val usbDriver = getAntennaDriver(usbManager) ?: return -1
+        val usbDriver = getAntennaDriver(usbManager) ?: return Message.DRIVER_NOT_FOUND
 
         if (!usbManager.hasPermission(usbDriver.device)) {
             requestPermission(context, usbManager, usbDriver.device, addressee, text)
-            return -2
+            return Message.USB_PERMISSION_RESTRICTED
         }
 
         val bytes = encodeToBytes(addressee, text, tone, frequency, invert, alpha)
-
-        Log.e("BytesEbc", bytes.joinToString { it.toUByte().toString(16) })
 
         return sendToPager(usbManager, usbDriver, bytes)
     }
@@ -102,7 +101,7 @@ object AntennaCommunicator {
         bytes: ByteArray
     ): Int {
 
-        val connection = usbManager.openDevice(usbDriver.device) ?: return -1
+        val connection = usbManager.openDevice(usbDriver.device) ?: return Message.DEVICE_OPEN_FAILED
 
         val port = usbDriver.ports[0]
 

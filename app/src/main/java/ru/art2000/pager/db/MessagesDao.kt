@@ -8,7 +8,7 @@ import ru.art2000.pager.models.Message
 @Dao
 abstract class MessagesDao(private val messagesDatabase: MessagesDatabase) {
 
-    @Query("SELECT * FROM messages WHERE chatId = :id AND status >= ${Message.STATUS_SEND_ERROR}")
+    @Query("SELECT * FROM messages WHERE chatId = :id AND status >= ${Message.FIRST_VISIBLE_CODE}")
     public abstract fun liveAllVisibleByChatId(id: Int): LiveData<List<Message>>
 
     @Query("SELECT * FROM messages WHERE id = :id")
