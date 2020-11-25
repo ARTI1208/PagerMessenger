@@ -12,9 +12,9 @@
         android:clipToPadding="false"
         android:paddingBottom="68dp" />
 
-    <com.google.android.material.progressindicator.ProgressIndicator
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/load_indicator"
-        style="@style/Widget.MaterialComponents.ProgressIndicator.Circular.Indeterminate"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
