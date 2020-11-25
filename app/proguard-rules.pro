@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class ru.art2000.pager.viewmodels.* { *; }
+-keep class ru.art2000.pager.models.* { *; }
+-keep class ru.art2000.pager.db.* { *; }
