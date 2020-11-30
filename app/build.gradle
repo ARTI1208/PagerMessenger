@@ -100,4 +100,6 @@ dependencies {
     def paging_version = "3.0.0-alpha09"
 
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+
+    implementation "com.ibm.icu:icu4j:68.1"
 }

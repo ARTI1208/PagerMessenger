@@ -7,11 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.icu.text.Transliterator
 import androidx.core.content.ContextCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import com.ibm.icu.text.Transliterator
 import ru.art2000.pager.extensions.toInt
 import ru.art2000.pager.models.Message
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
@@ -53,7 +53,9 @@ object AntennaCommunicator {
 
         val postfix = byteArrayOf(0x18u.toByte())
 
-        return prefix + addresseeBytes + settingsBytes + text.toByteArray() + postfix
+        val transliteratedText = Transliterator.getInstance("Cyrillic-Latin")?.transliterate(text) ?: text
+
+        return prefix + addresseeBytes + settingsBytes + transliteratedText.toByteArray() + postfix
     }
 
     fun sendToPager(

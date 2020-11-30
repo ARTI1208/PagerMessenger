@@ -1,7 +1,6 @@
 package ru.art2000.pager.helpers
 
 import android.content.Context
-import android.os.Build
 import ru.art2000.pager.BuildConfig
 import ru.art2000.pager.PagerApplication
 import ru.art2000.pager.db.messagesTable
