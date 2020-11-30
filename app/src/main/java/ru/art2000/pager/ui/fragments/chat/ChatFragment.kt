@@ -2,6 +2,7 @@ package ru.art2000.pager.ui.fragments.chat
 
 import android.os.Bundle
 import android.text.Editable
+import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.RelativeLayout
@@ -10,10 +11,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.internal.TextWatcherAdapter
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatFragmentBinding
 import ru.art2000.pager.extensions.requireCompatActivity
@@ -51,25 +56,34 @@ class ChatFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        addressee = args.chatView.addressee
+        addressee = args.addressee
 
         viewBinding.messagesListRecycler.layoutManager =
-            LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
+            LinearLayoutManager(requireContext()).apply { reverseLayout = true }
 
         messagesAdapter = MessagesListAdapter(
             requireContext(),
-            emptyList(),
-            viewModel.getMessageActions(args.chatView)
-        )
+            viewModel.getMessageActions(args.addressee)
+        ).apply {
+            addLoadStateListener {
+                viewBinding.emptyTextView.visibility =
+                    if (itemCount == 0) View.VISIBLE else View.GONE
+                Log.e("LoadState", "Prepend: ${it.prepend}")
+                Log.e("LoadState", "Append: ${it.append}")
+                Log.e("LoadState", "Refresh: ${it.refresh}")
+                if (it.refresh is LoadState.NotLoading && itemCount > 0) {
+                    viewBinding.messagesListRecycler.scrollToPosition(0)
+                }
+            }
+        }
         viewBinding.messagesListRecycler.adapter = messagesAdapter
 
-        viewModel.allMessages(args.chatView).observe(viewLifecycleOwner) {
-            viewBinding.emptyTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
 
-            messagesAdapter.setNewData(it)
-            if (it.isNotEmpty()) {
-                viewBinding.messagesListRecycler.smoothScrollToPosition(it.lastIndex)
+        lifecycleScope.launch {
+            viewModel.allPagedReversedMessages(args.addressee).collectLatest {
+                messagesAdapter.submitData(it)
             }
+
         }
     }
 
@@ -78,13 +92,21 @@ class ChatFragment : Fragment() {
 
         updateActionBar()
 
-        val lastMessage = args.chatView.lastMessage
-        if (lastMessage?.isDraft == true) {
-            viewBinding.messageEt.text.append(lastMessage.text)
-            viewBinding.invertPolarityCb.isChecked = lastMessage.invert
-            viewBinding.typeSwitch.isChecked = lastMessage.alpha
+        val messageDraft = args.draft
+        if (messageDraft == null) { // default setup
 
-            val toneRbToSelect = when (lastMessage.tone) {
+            viewBinding.messageEt.text.apply { replace(0, length, "") }
+            viewBinding.invertPolarityCb.isChecked = false
+            viewBinding.typeSwitch.isChecked = true
+            viewBinding.toneGroup.check(viewBinding.toneARadio.id)
+            viewBinding.freqGroup.check(viewBinding.freq2400Radio.id)
+        } else {
+
+            viewBinding.messageEt.text.apply { replace(0, length, messageDraft.text) }
+            viewBinding.invertPolarityCb.isChecked = messageDraft.invert
+            viewBinding.typeSwitch.isChecked = messageDraft.alpha
+
+            val toneRbToSelect = when (messageDraft.tone) {
                 AntennaCommunicator.Tone.A -> viewBinding.toneARadio.id
                 AntennaCommunicator.Tone.B -> viewBinding.toneBRadio.id
                 AntennaCommunicator.Tone.C -> viewBinding.toneCRadio.id
@@ -93,7 +115,7 @@ class ChatFragment : Fragment() {
 
             viewBinding.toneGroup.check(toneRbToSelect)
 
-            val freqRbToSelect = when (lastMessage.frequency) {
+            val freqRbToSelect = when (messageDraft.frequency) {
                 AntennaCommunicator.Frequency.F512 -> viewBinding.freq512Radio.id
                 AntennaCommunicator.Frequency.F1200 -> viewBinding.freq1200Radio.id
                 AntennaCommunicator.Frequency.F2400 -> viewBinding.freq2400Radio.id
@@ -102,39 +124,7 @@ class ChatFragment : Fragment() {
             viewBinding.freqGroup.check(freqRbToSelect)
         }
 
-        viewBinding.messageEt.addTextChangedListener(object : TextWatcherAdapter() {
-            override fun afterTextChanged(s: Editable) {
-                saveMessage(s.toString(), false)
-            }
-        })
-
-        viewBinding.sendButton.setOnClickListener {
-            val text = viewBinding.messageEt.text.toString()
-            if (text.isEmpty()) {
-                Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            saveMessage(text, true)
-
-            viewBinding.messageEt.text.clear()
-        }
-
-        viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
-            saveMessage(viewBinding.messageEt.text.toString(), false)
-        }
-
-        viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
-            saveMessage(viewBinding.messageEt.text.toString(), false)
-        }
-
-        viewBinding.toneGroup.setOnCheckedChangeListener { _, _ ->
-            saveMessage(viewBinding.messageEt.text.toString(), false)
-        }
-
-        viewBinding.freqGroup.setOnCheckedChangeListener { _, _ ->
-            saveMessage(viewBinding.messageEt.text.toString(), false)
-        }
+        setupViewListeners()
 
         val behaviour = BottomSheetBehavior.from(viewBinding.sendLayout)
         behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -184,7 +174,7 @@ class ChatFragment : Fragment() {
 
                     thread {
                         viewModel.renameAddressee(
-                            args.chatView.addressee,
+                            args.addressee,
                             addresseeInput.text.toString()
                         )
                     }
@@ -213,6 +203,45 @@ class ChatFragment : Fragment() {
         requireCompatActivity().supportActionBar?.title = newTitle
     }
 
+    private fun setupViewListeners() {
+        viewBinding.messageEt.addTextChangedListener(object : TextWatcherAdapter() {
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                if (before == count) return
+
+                saveMessage(s.toString(), false)
+            }
+        })
+
+        viewBinding.sendButton.setOnClickListener {
+            val text = viewBinding.messageEt.text.toString()
+            if (text.isEmpty()) {
+                Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            saveMessage(text, true)
+
+            viewBinding.messageEt.text.clear()
+        }
+
+        viewBinding.invertPolarityCb.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.typeSwitch.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.toneGroup.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+
+        viewBinding.freqGroup.setOnCheckedChangeListener { _, _ ->
+            saveMessage(viewBinding.messageEt.text.toString(), false)
+        }
+    }
+
     private fun saveMessage(text: String, sendToPager: Boolean) {
 
         val tone = when (viewBinding.toneGroup.checkedRadioButtonId) {
@@ -230,7 +259,7 @@ class ChatFragment : Fragment() {
 
         if (sendToPager) {
             viewModel.sendMessage(
-                args.chatView.addressee.number,
+                args.addressee.number,
                 text,
                 tone,
                 frequency,
@@ -240,7 +269,7 @@ class ChatFragment : Fragment() {
 
         } else {
             viewModel.saveDraft(
-                args.chatView,
+                args.addressee,
                 text,
                 tone,
                 frequency,

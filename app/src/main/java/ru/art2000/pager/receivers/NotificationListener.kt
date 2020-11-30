@@ -5,9 +5,11 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import ru.art2000.pager.helpers.sendMessageAndSave
+import ru.art2000.pager.PagerApplication
+import ru.art2000.pager.helpers.sendMessage
 import ru.art2000.pager.viewmodels.ForwardingViewModel
 import java.io.FileNotFoundException
+import java.util.*
 
 //TODO remove apps from list after being uninstalled?
 class NotificationListener : NotificationListenerService() {
@@ -18,7 +20,14 @@ class NotificationListener : NotificationListenerService() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        if (sbn.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0) return
+
+        val title = sbn.notification.extras[Notification.EXTRA_TITLE]?.toString()
+        val text = sbn.notification.extras[Notification.EXTRA_TEXT]?.toString()
+
+        if (title.isNullOrEmpty() && text.isNullOrEmpty()) return
 
         val inputStream = try {
             openFileInput(ForwardingViewModel.DATA_FILE_NAME)
@@ -43,8 +52,7 @@ class NotificationListener : NotificationListenerService() {
 
         if (addresseeIds.isEmpty()) return
 
-        val title = sbn.notification.extras[Notification.EXTRA_TITLE]
-        val text = sbn.notification.extras[Notification.EXTRA_TEXT]
+        PagerApplication.Logger.log("Fetched notification of ${sbn.packageName} with id = ${sbn.id}, postTime = ${Date(sbn.postTime)}")
 
         val notificationAppInfo = try {
             packageManager.getApplicationInfo(sbn.packageName, 0)
@@ -57,8 +65,10 @@ class NotificationListener : NotificationListenerService() {
         else
             packageManager.getApplicationLabel(notificationAppInfo)
 
+        val forwardText = "*$notificationAppTitle*" + (if (title != null) " !$title!" else "") + (if (text != null) " $text" else "")
+
         addresseeIds.forEach { id ->
-            sendMessageAndSave(this, id, "*$notificationAppTitle* !$title! $text")
+            sendMessage(this, id, forwardText, saveIfError = false)
         }
     }
 }

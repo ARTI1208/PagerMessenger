@@ -3,19 +3,17 @@ package ru.art2000.pager.ui.fragments.chatlist
 import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
-import android.util.Log
 import android.view.View
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.CheckableChatListItemBinding
-import ru.art2000.pager.models.ChatView
-import ru.art2000.pager.models.Message
+import ru.art2000.pager.models.*
 
 sealed class ChatItemViewHolderBase<VH : RecyclerView.ViewHolder>(
     val viewBinding: CheckableChatListItemBinding,
     private val onChatClick: (ChatView, VH) -> Unit,
-    private val getChatView: (Int) -> ChatView,
+    private val getChatView: (Int) -> ChatView?,
 ) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val mContext: Context
@@ -23,13 +21,14 @@ sealed class ChatItemViewHolderBase<VH : RecyclerView.ViewHolder>(
 
     init {
         viewBinding.root.setOnClickListener {
+            val chatView = getChatView(bindingAdapterPosition) ?: return@setOnClickListener
             @Suppress("UNCHECKED_CAST")
-            onChatClick(getChatView(bindingAdapterPosition), this as VH)
+            onChatClick(chatView, this as VH)
         }
     }
 
-    open fun bind(chatView: ChatView) {
-        viewBinding.addresseeTv.text = chatView.addressee.toDisplayName()
+    open fun bind(chatView: ChatView?) {
+        viewBinding.addresseeTv.text = chatView?.addressee?.toDisplayName() ?: "Loading.."
         viewBinding.lastMessageTv.text = getLastMessagePreview(chatView)
     }
 
@@ -42,17 +41,20 @@ sealed class ChatItemViewHolderBase<VH : RecyclerView.ViewHolder>(
             )
         }
 
-    private fun getLastMessagePreview(chatView: ChatView): CharSequence =
-        chatView.lastMessage?.let {
+    private fun getDraftString(preview: MessageLike): CharSequence? {
+        return if (preview.text.isEmpty()) null else buildSpannedString {
+            append(
+                "${mContext.getString(R.string.chat_item_draft)}: ",
+                StyleSpan(Typeface.ITALIC),
+                0
+            )
+            append(preview.text)
+        }
+    }
+
+    private fun getLastMessagePreview(chatView: ChatView?): CharSequence =
+        chatView?.draft?.let { getDraftString(it) } ?: chatView?.lastMessage?.let {
             when (it.status) {
-                Message.STATUS_DRAFT -> buildSpannedString {
-                    append(
-                        "${mContext.getString(R.string.chat_item_draft)}: ",
-                        StyleSpan(Typeface.ITALIC),
-                        0
-                    )
-                    append(it.text)
-                }
                 Message.STATUS_CHAT_CREATED -> noMessagesString
                 else -> it.text
             }
@@ -62,11 +64,11 @@ sealed class ChatItemViewHolderBase<VH : RecyclerView.ViewHolder>(
 class MainChatItemViewHolder(
     viewBinding: CheckableChatListItemBinding,
     onChatClick: (ChatView, MainChatItemViewHolder) -> Unit,
-    getChatView: (Int) -> ChatView,
+    getChatView: (Int) -> ChatView?,
     private val onLongClick: (MainChatItemViewHolder) -> Unit = {},
     private val onCheck: (MainChatItemViewHolder, Boolean) -> Unit = { _, _ -> },
     checkable: Boolean = false,
-    private val isChatChecked: (ChatView) -> Boolean
+    private val isChatChecked: (Addressee) -> Boolean
 ) : ChatItemViewHolderBase<MainChatItemViewHolder>(viewBinding, onChatClick, getChatView) {
 
     init {
@@ -85,11 +87,15 @@ class MainChatItemViewHolder(
 
     }
 
-    override fun bind(chatView: ChatView) {
+    override fun bind(chatView: ChatView?) {
         super.bind(chatView)
 
         if (viewBinding.itemSelectCheckBox.visibility == View.VISIBLE) {
-            viewBinding.itemSelectCheckBox.isChecked = isChatChecked(chatView)
+
+            viewBinding.itemSelectCheckBox.isChecked = if (chatView == null)
+                false
+            else
+                isChatChecked(chatView.addressee)
         }
     }
 
@@ -98,30 +104,38 @@ class MainChatItemViewHolder(
 class ChatSelectItemViewHolder(
     viewBinding: CheckableChatListItemBinding,
     onChatClick: (ChatView, ChatSelectItemViewHolder) -> Unit,
-    getChatView: (Int) -> ChatView,
+    getChatView: (Int) -> ChatView?,
     private val checkable: Boolean,
-    private val isChatChecked: (ChatView) -> Boolean,
-    private val onChatChecked: (ChatView, Boolean) -> Unit,
+    private val isChatChecked: (Addressee) -> Boolean,
+    private val onChatChecked: (Addressee, Boolean) -> Unit,
 ) : ChatItemViewHolderBase<ChatSelectItemViewHolder>(viewBinding, onChatClick, getChatView) {
 
     init {
         viewBinding.itemSelectCheckBox.visibility = if (checkable) View.VISIBLE else View.GONE
 
         viewBinding.root.setOnClickListener {
-            onChatClick(getChatView(bindingAdapterPosition), this)
+            val addressee = getChatView(bindingAdapterPosition) ?: return@setOnClickListener
+            onChatClick(addressee, this)
 
             if (checkable) viewBinding.itemSelectCheckBox.performClick()
         }
     }
 
-    override fun bind(chatView: ChatView) {
+    override fun bind(chatView: ChatView?) {
         super.bind(chatView)
 
         viewBinding.itemSelectCheckBox.apply {
             setOnCheckedChangeListener(null)
-            isChecked = isChatChecked(chatView)
-            setOnCheckedChangeListener { _, isChecked ->
-                onChatChecked(chatView, isChecked)
+
+            if (chatView == null) {
+                isEnabled = false
+                isChecked = false
+            } else {
+                isEnabled = true
+                isChecked = isChatChecked(chatView.addressee)
+                setOnCheckedChangeListener { _, isChecked ->
+                    onChatChecked(chatView.addressee, isChecked)
+                }
             }
         }
     }

@@ -29,6 +29,9 @@
     <string name="select_chats_by_chats_title">Select chat</string>
     <string name="select_chats_by_apps_title">Select chats</string>
 
+    <string name="invalid_number_dialog_title">Invalid number</string>
+    <string name="invalid_number_dialog_message">Please specify the correct integer number</string>
+
     <!--Chat-->
     <string name="message_input_hint">Your message</string>
     <string name="message_setting_invert_polarity">Invert polarity</string>

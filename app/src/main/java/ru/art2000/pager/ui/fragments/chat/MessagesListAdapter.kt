@@ -1,8 +1,11 @@
 package ru.art2000.pager.ui.fragments.chat
 
-import android.app.Activity
 import android.content.Context
-import android.view.*
+import android.view.ContextMenu
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.databinding.MessageItemBinding
@@ -11,32 +14,21 @@ import ru.art2000.pager.models.MessageAction
 
 class MessagesListAdapter(
     private val mContext: Context,
-    private var messages: List<Message>,
-    private val actions: List<MessageAction> = emptyList()
-) : RecyclerView.Adapter<MessagesListAdapter.MessageItemViewHolder>() {
+    private val actions: List<MessageAction>
+) : PagingDataAdapter<Message, MessagesListAdapter.MessageItemViewHolder>(diffCallback) {
 
-    public fun setNewData(newMessages: List<Message>) {
-        val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int {
-                return messages.size
+    companion object {
+
+        val diffCallback = object : DiffUtil.ItemCallback<Message>() {
+
+            override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
+                return oldItem == newItem
             }
 
-            override fun getNewListSize(): Int {
-                return newMessages.size
+            override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
+                return oldItem == newItem
             }
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return messages[oldItemPosition] == newMessages[newItemPosition]
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return messages[oldItemPosition] == newMessages[newItemPosition]
-            }
-
-        })
-
-        messages = newMessages
-        result.dispatchUpdatesTo(this)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
@@ -46,12 +38,11 @@ class MessagesListAdapter(
     }
 
     override fun onBindViewHolder(holder: MessageItemViewHolder, position: Int) {
-        val message = messages[position]
-        holder.viewBinding.textTv.text = message.text
-        holder.viewBinding.errorImage.visibility = if (message.isError) View.VISIBLE else View.GONE
+        val message = getItem(position)
+        holder.viewBinding.textTv.text = message?.text
+        holder.viewBinding.errorImage.visibility =
+            if (message?.isError == true) View.VISIBLE else View.GONE
     }
-
-    override fun getItemCount(): Int = messages.size
 
     inner class MessageItemViewHolder(
         val viewBinding: MessageItemBinding
@@ -68,8 +59,8 @@ class MessagesListAdapter(
             v: View,
             menuInfo: ContextMenu.ContextMenuInfo?
         ) {
-            val message = messages[bindingAdapterPosition]
             menu.clear()
+            val message = getItem(bindingAdapterPosition) ?: return
 
             actions.filter { it.displayOnClick(message) }.forEach { action ->
                 menu.add(action.name).setOnMenuItemClickListener {

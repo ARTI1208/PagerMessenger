@@ -3,62 +3,42 @@ package ru.art2000.pager.ui.fragments.chatlist
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import ru.art2000.pager.databinding.CheckableChatListItemBinding
+import ru.art2000.pager.models.Addressee
 import ru.art2000.pager.models.ChatView
 
 abstract class ChatListAdapter<VH : ChatItemViewHolderBase<*>>(
     protected val mContext: Context,
-) : RecyclerView.Adapter<VH>() {
+) : PagingDataAdapter<ChatView, VH>(diffCallback) {
 
-    private var chatViews: List<ChatView> = emptyList()
+    companion object {
 
-    var data: List<ChatView>
-        get() = chatViews
-        set(value) = setNewData(value)
+        private val diffCallback = object : DiffUtil.ItemCallback<ChatView>() {
 
-    private fun setNewData(newChats: List<ChatView>) {
-        val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int {
-                return chatViews.size
+            override fun areItemsTheSame(oldItem: ChatView, newItem: ChatView): Boolean {
+                return oldItem.addressee.number == newItem.addressee.number
             }
 
-            override fun getNewListSize(): Int {
-                return newChats.size
+            override fun areContentsTheSame(oldItem: ChatView, newItem: ChatView): Boolean {
+                return oldItem.addressee.nickname == newItem.addressee.nickname
+                        && oldItem.chatPreview?.text == newItem.chatPreview?.text
             }
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return chatViews[oldItemPosition].addressee.number == newChats[newItemPosition].addressee.number
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                val old = chatViews[oldItemPosition]
-                val new = newChats[newItemPosition]
-                return old.addressee.nickname == new.addressee.nickname
-                        && old.lastMessage?.text == new.lastMessage?.text
-                        && old.lastMessage?.status == new.lastMessage?.status
-            }
-
-        })
-
-        chatViews = newChats
-        result.dispatchUpdatesTo(this)
+        }
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val chatView = chatViews[position]
+        val chatView = getItem(position)
         holder.bind(chatView)
     }
-
-    override fun getItemCount(): Int = chatViews.size
 }
 
 class MainChatListAdapter(
     mContext: Context,
     private val onChatClick: (ChatView, MainChatItemViewHolder) -> Unit,
-    private val reportSelect: (ChatView, Boolean) -> Unit,
-    private val isSelected: (ChatView) -> Boolean,
+    private val reportSelect: (Addressee, Boolean) -> Unit,
+    private val isSelected: (Addressee) -> Boolean,
     private val selectCount: () -> Int,
 ) : ChatListAdapter<MainChatItemViewHolder>(mContext) {
 
@@ -86,18 +66,19 @@ class MainChatListAdapter(
                     holder.viewBinding.itemSelectCheckBox.performClick()
                 }
             },
-            { data[it] },
+            { getItem(it) },
             {
                 if (viewType == SELECT_MODE) return@MainChatItemViewHolder
 
-                val chatView = data[it.bindingAdapterPosition]
+                val chatView = getItem(it.bindingAdapterPosition) ?: return@MainChatItemViewHolder
 
-                reportSelect(chatView, true)
+                reportSelect(chatView.addressee, true)
                 notifyItemRangeChanged(0, itemCount)
             },
             { holder, isChecked ->
-
-                reportSelect(data[holder.bindingAdapterPosition], isChecked)
+                val chatView =
+                    getItem(holder.bindingAdapterPosition) ?: return@MainChatItemViewHolder
+                reportSelect(chatView.addressee, isChecked)
                 if (selectCount() == 0) {
                     disableSelectMode()
                 }
@@ -113,15 +94,15 @@ class ChatSelectListAdapter(
     mContext: Context,
     private val onChatClick: (ChatView, ChatSelectItemViewHolder) -> Unit,
     private val checkable: Boolean,
-    private val isChatChecked: (ChatView) -> Boolean,
-    private val onChatChecked: (ChatView, Boolean) -> Unit,
+    private val isChatChecked: (Addressee) -> Boolean,
+    private val onChatChecked: (Addressee, Boolean) -> Unit,
 ) : ChatListAdapter<ChatSelectItemViewHolder>(mContext) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatSelectItemViewHolder =
         ChatSelectItemViewHolder(
             CheckableChatListItemBinding.inflate(LayoutInflater.from(mContext), parent, false),
             onChatClick,
-            { data[it] },
+            { getItem(it) },
             checkable,
             isChatChecked,
             onChatChecked

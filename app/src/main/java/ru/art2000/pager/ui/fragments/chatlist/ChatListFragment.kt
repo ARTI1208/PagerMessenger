@@ -10,19 +10,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.internal.TextWatcherAdapter
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.art2000.pager.R
 import ru.art2000.pager.databinding.ChatListFragmentBinding
 import ru.art2000.pager.extensions.contextNavigationCoordinator
+import ru.art2000.pager.models.Addressee
 import ru.art2000.pager.models.ChatView
 import ru.art2000.pager.viewmodels.ChatListViewModel
 import ru.art2000.pager.viewmodels.ForwardingViewModel
 import kotlin.concurrent.thread
-
 
 abstract class ChatListFragment : Fragment() {
 
@@ -48,36 +51,7 @@ abstract class ChatListFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        viewBinding.newChatFab.setOnClickListener {
-
-            val addresseeInput = EditText(requireContext())
-            addresseeInput.inputType =
-                EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
-
-            val okButtonRes = getFabDialogOkButtonRes()
-
-            val dialog = AlertDialog.Builder(requireContext())
-                .setTitle(R.string.dialog_new_chat_title)
-                .setView(addresseeInput)
-                .setNegativeButton(R.string.dialog_new_chat_cancel_button) { dialog, _ -> dialog.cancel() }
-                .setPositiveButton(okButtonRes) { _, _ ->
-                    onFabDialogOkButtonClick(addresseeInput.text.toString())
-                }.create()
-
-            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-            dialog.setOnShowListener {
-                addresseeInput.requestFocus()
-            }
-
-            dialog.show()
-
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
-            addresseeInput.addTextChangedListener(object : TextWatcherAdapter() {
-                override fun afterTextChanged(s: Editable) {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = s.isNotEmpty()
-                }
-            })
-        }
+        viewBinding.newChatFab.setOnClickListener { openChatCreationDialog() }
 
         adapter = createListAdapter()
 
@@ -101,8 +75,8 @@ abstract class ChatListFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel.allChats().observe(viewLifecycleOwner, Observer {
-            if (it.isEmpty()) {
+        adapter.addLoadStateListener {
+            if (adapter.itemCount == 0) {
                 viewBinding.emptyTextView.visibility = View.VISIBLE
                 viewBinding.chatListRecycler.visibility = View.GONE
             } else {
@@ -110,13 +84,64 @@ abstract class ChatListFragment : Fragment() {
                 viewBinding.chatListRecycler.visibility = View.VISIBLE
             }
 
-            adapter.data = it
-
-            if (viewModel.shouldScrollToTop) {
-                viewBinding.chatListRecycler.smoothScrollToPosition(0)
+            if (it.refresh is LoadState.NotLoading && viewModel.shouldScrollToTop) {
+                viewBinding.chatListRecycler.scrollToPosition(0)
                 viewModel.shouldScrollToTop = false
             }
+        }
+
+        lifecycleScope.launch {
+            viewModel.allChatsFlow().collectLatest {
+                adapter.submitData(it)
+            }
+        }
+    }
+
+    private fun openChatCreationDialog() {
+        val addresseeInput = EditText(requireContext())
+        addresseeInput.inputType =
+            EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
+
+        val okButtonRes = getFabDialogOkButtonRes()
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.dialog_new_chat_title)
+            .setView(addresseeInput)
+            .setNegativeButton(R.string.dialog_new_chat_cancel_button) { dialog, _ -> dialog.cancel() }
+            .setPositiveButton(okButtonRes) { _, _ ->
+                onFabDialogOkButtonClick(addresseeInput.text.toString())
+            }.create()
+
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog.setOnShowListener {
+            addresseeInput.requestFocus()
+        }
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
+        addresseeInput.addTextChangedListener(object : TextWatcherAdapter() {
+            override fun afterTextChanged(s: Editable) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = s.isNotEmpty()
+            }
         })
+    }
+
+    protected fun checkChatNumber(text: String): Int? {
+        val number = text.toIntOrNull()
+
+        if (number == null) {
+
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.invalid_number_dialog_title)
+                .setMessage(R.string.invalid_number_dialog_message)
+                .setNegativeButton(R.string.cancel) { _, _ -> }
+                .setPositiveButton(R.string.ok) { _, _ -> openChatCreationDialog() }
+                .create()
+                .show()
+        }
+
+        return number
     }
 
     abstract fun createListAdapter(): ChatListAdapter<*>
@@ -136,7 +161,7 @@ class MainChatListFragment : ChatListFragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.chat_list_menu, menu)
 
-        viewModel.isSelectMode.observe(viewLifecycleOwner, Observer {
+        viewModel.isSelectMode.observe(viewLifecycleOwner, {
             val settingsItem = menu.findItem(R.id.settings_item)
             val deleteItem = menu.findItem(R.id.delete_item)
             val cancelItem = menu.findItem(R.id.cancel_item)
@@ -171,7 +196,7 @@ class MainChatListFragment : ChatListFragment() {
 
     override fun createListAdapter(): ChatListAdapter<*> = MainChatListAdapter(
         requireActivity(),
-        { chatView, _ -> openChat(chatView) },
+        { chat, _ -> openChat(chat) },
         viewModel::addOrRemoveChat,
         viewModel.selectedChats::contains,
         viewModel.selectedChats::size
@@ -185,18 +210,23 @@ class MainChatListFragment : ChatListFragment() {
     override fun getFabDialogOkButtonRes(): Int = R.string.dialog_new_chat_button_create_or_open
 
     override fun onFabDialogOkButtonClick(text: String) {
+        val number = checkChatNumber(text) ?: return
+
         thread {
-            val chat = viewModel.createChat(text.toInt())
+            val chat = viewModel.createChat(number)
 
             requireActivity().runOnUiThread {
-                openChat(chat)
+                openChat(ChatView(chat, null, null))
             }
         }
     }
 
     private fun openChat(chat: ChatView) {
         navigationCoordinator.navigateTo(
-            MainChatListFragmentDirections.actionChatListFragmentToChatFragment(chat)
+            MainChatListFragmentDirections.actionChatListFragmentToChatFragment(
+                chat.addressee,
+                chat.draft
+            )
         )
     }
 
@@ -231,13 +261,13 @@ class SelectChatFragment : ChatListFragment() {
                 true,
                 {
                     forwardingViewModel.isPackageSelectedForForwarding(
-                        it.addressee.number,
+                        it.number,
                         args.appPackage!!
                     )
                 },
                 { chatView, isChecked ->
                     forwardingViewModel.savePackage(
-                        chatView.addressee.number,
+                        chatView.number,
                         args.appPackage!!,
                         isChecked
                     )
@@ -246,7 +276,7 @@ class SelectChatFragment : ChatListFragment() {
         } else {
             ChatSelectListAdapter(
                 requireActivity(),
-                { chatView, _ -> showAppsForChat(chatView) },
+                { chatView, _ -> showAppsForChat(chatView.addressee) },
                 false,
                 { false },
                 { _, _ -> },
@@ -262,12 +292,15 @@ class SelectChatFragment : ChatListFragment() {
     override fun getFabDialogOkButtonRes(): Int = R.string.dialog_new_chat_button_create
 
     override fun onFabDialogOkButtonClick(text: String) {
-        thread { viewModel.createChat(text.toInt()) }
+
+        val number = checkChatNumber(text) ?: return
+
+        thread { viewModel.createChat(number) }
     }
 
-    private fun showAppsForChat(chat: ChatView) {
+    private fun showAppsForChat(chat: Addressee) {
         navigationCoordinator.navigateTo(
-            SelectChatFragmentDirections.actionSelectChatFragmentToAppsListeningSelectFragment(chat.addressee.number)
+            SelectChatFragmentDirections.actionSelectChatFragmentToAppsListeningSelectFragment(chat.number)
         )
     }
 }

@@ -2,18 +2,22 @@ package ru.art2000.pager.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
 import ru.art2000.pager.R
 import ru.art2000.pager.db.addresseeTable
+import ru.art2000.pager.db.draftsTable
 import ru.art2000.pager.db.messagesTable
 import ru.art2000.pager.hardware.AntennaCommunicator
-import ru.art2000.pager.helpers.sendMessageAndSave
+import ru.art2000.pager.helpers.sendMessage
 import ru.art2000.pager.models.*
 import kotlin.concurrent.thread
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    fun getMessageActions(chat: ChatView): List<MessageAction> {
+    fun getMessageActions(addressee: Addressee): List<MessageAction> {
         return listOf(
             SimpleAction(
                 R.string.message_action_resend,
@@ -24,14 +28,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun renameAddressee(addressee: Addressee, newName: String) {
-        addresseeTable(getApplication()) {
-            deleteAddressee(addressee.number)
-            insertAddressee(Addressee(addressee.number, newName))
-        }
+        addresseeTable(getApplication()) { updateAddressee(Addressee(addressee.number, newName)) }
     }
 
-    fun allMessages(chat: ChatView): LiveData<List<Message>> {
-        return messagesTable(getApplication()) { liveAllVisibleByChatId(chat.addressee.number) }
+    fun allPagedReversedMessages(addressee: Addressee): Flow<PagingData<Message>> {
+        return Pager(PagingConfig(50, 20, false, maxSize = 150)) {
+            messagesTable(getApplication()) { pagedReversedVisibleMessages(addressee.number) }
+        }.flow
     }
 
     private fun sendMessage(message: Message): Int = sendMessage(
@@ -50,23 +53,25 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         frequency: AntennaCommunicator.Frequency = AntennaCommunicator.Frequency.F2400,
         invert: Boolean = false,
         alpha: Boolean = true
-    ): Int = sendMessageAndSave(getApplication(), addressee, text, tone, frequency, invert, alpha)
+    ): Int = sendMessage(getApplication(), addressee, text, tone, frequency, invert, alpha)
 
-    fun saveDraft(chat: ChatView,
-                  text: String,
-                  tone: AntennaCommunicator.Tone = AntennaCommunicator.Tone.A,
-                  frequency: AntennaCommunicator.Frequency = AntennaCommunicator.Frequency.F2400,
-                  invert: Boolean = false,
-                  alpha: Boolean = true) {
+    fun saveDraft(
+        addressee: Addressee,
+        text: String,
+        tone: AntennaCommunicator.Tone = AntennaCommunicator.Tone.A,
+        frequency: AntennaCommunicator.Frequency = AntennaCommunicator.Frequency.F2400,
+        invert: Boolean = false,
+        alpha: Boolean = true
+    ) {
+
         thread {
-            messagesTable(getApplication()) {
-                insertOrUpdateDraft(
-                    Message(
-                        0,
-                        chat.addressee.number,
+
+            draftsTable(getApplication()) {
+                updateDraft(
+                    MessageDraft(
+                        addressee.number,
                         text,
                         tone, frequency, invert, alpha,
-                        Message.STATUS_DRAFT
                     )
                 )
             }

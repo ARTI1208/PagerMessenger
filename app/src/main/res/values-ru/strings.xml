@@ -28,6 +28,9 @@
     <string name="select_chats_by_chats_title">Выберите чат</string>
     <string name="select_chats_by_apps_title">Выберите чаты</string>
 
+    <string name="invalid_number_dialog_title">Некорректное число</string>
+    <string name="invalid_number_dialog_message">Пожалуйста, укажите корректное целочисленное значение</string>
+
     <!--Chat-->
     <string name="message_input_hint">Ваше сообщение</string>
     <string name="message_setting_invert_polarity">Инвертировать полярность</string>

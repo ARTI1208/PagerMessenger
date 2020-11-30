@@ -2,54 +2,38 @@ package ru.art2000.pager.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import ru.art2000.pager.db.MessagesDatabase
-import ru.art2000.pager.db.chatsTable
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
+import ru.art2000.pager.db.addresseeTable
 import ru.art2000.pager.db.messagesTable
-import ru.art2000.pager.models.Addressee
-import ru.art2000.pager.models.Chat
-import ru.art2000.pager.models.ChatView
-import ru.art2000.pager.models.Message
+import ru.art2000.pager.models.*
 import kotlin.concurrent.thread
 
 class ChatListViewModel(application: Application) : AndroidViewModel(application) {
 
-    val selectedChats = mutableSetOf<ChatView>()
+    val selectedChats = mutableSetOf<Addressee>()
 
     private val mIsSelectMode = MutableLiveData(false)
     val isSelectMode get() = mIsSelectMode
 
     var shouldScrollToTop: Boolean = false
 
-    fun allChats(): LiveData<List<ChatView>> {
-        val mediator = MediatorLiveData<List<ChatView>>()
-        val messagesDatabase = MessagesDatabase.getInstance(getApplication())
-        mediator.addSource(messagesDatabase.chatsDao().liveAll()) { chats ->
-            thread {
-                val views = chats.map {
-                    val addressee = messagesDatabase.addresseeTable { byNumber(it.addresseeNumber) }
-                        ?: Addressee(it.addresseeNumber)
+    fun allChatsFlow(): Flow<PagingData<ChatView>> {
 
-                    val lastMessage =
-                        messagesDatabase.messagesTable { lastMessageForChatWithDraft(it.addresseeNumber) }
+        val config = PagingConfig(40, 20, maxSize = 100)
+        val pager = Pager(config) { addresseeTable(getApplication()) { sourceAllJoinedOrdered() } }
 
-                    ChatView(addressee, lastMessage)
-                }.sortedByDescending { it.lastMessage?.time ?: -1 }
-
-                mediator.postValue(views)
-            }
-        }
-
-        return mediator
+        return pager.flow
     }
 
-    fun createChat(addressee: Int): ChatView {
-        chatsTable(getApplication()) {
-            if (byAddresseeNumber(addressee) != null) return@chatsTable
+    fun createChat(addressee: Int): Addressee {
+        addresseeTable(getApplication()) {
+            if (byNumber(addressee) != null) return@addresseeTable
 
-            insertChat(Chat(addressee))
+            insertAddressee(Addressee(addressee))
         }
 
         val initialMessage = Message(0, addressee, "", status = Message.STATUS_CHAT_CREATED)
@@ -57,7 +41,7 @@ class ChatListViewModel(application: Application) : AndroidViewModel(application
             insertChatCreatedMessage(initialMessage)
         }
 
-        return ChatView(Addressee(addressee), initialMessage)
+        return Addressee(addressee)
     }
 
     fun onSelectModeCanceled() {
@@ -67,8 +51,8 @@ class ChatListViewModel(application: Application) : AndroidViewModel(application
 
     fun deleteSelectedChats() {
         thread {
-            chatsTable(getApplication()) {
-                deleteChatsAndMessages(selectedChats.map { it.chat })
+            addresseeTable(getApplication()) {
+                deleteAddressees(selectedChats)
             }
 
             selectedChats.clear()
@@ -76,11 +60,11 @@ class ChatListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun addOrRemoveChat(chatView: ChatView, add: Boolean) {
+    fun addOrRemoveChat(addressee: Addressee, add: Boolean) {
         if (add) {
-            selectedChats += chatView
+            selectedChats += addressee
         } else {
-            selectedChats -= chatView
+            selectedChats -= addressee
         }
         mIsSelectMode.value = selectedChats.isNotEmpty()
     }
