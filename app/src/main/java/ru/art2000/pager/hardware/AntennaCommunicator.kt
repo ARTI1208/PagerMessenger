@@ -7,13 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
-import com.ibm.icu.text.Transliterator
 import ru.art2000.pager.extensions.toInt
+import ru.art2000.pager.models.CommunicatorPlugin
 import ru.art2000.pager.models.Message
+import ru.art2000.pager.models.PagerMessage
+import ru.art2000.pager.plugins.CyrillicToLatinTransliterator
+import ru.art2000.pager.plugins.PluginManager
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
 
 object AntennaCommunicator {
@@ -46,16 +50,24 @@ object AntennaCommunicator {
         invert: Boolean = false,
         alpha: Boolean = true
     ): ByteArray {
+
+        val initialSettings = encodeSettings(tone, frequency, invert, alpha)
+
+        val initialMessage = PagerMessage(addressee, text, initialSettings.toInt())
+
+        val transformedMessage = PluginManager.allPlugins.fold(initialMessage) { message, plugin ->
+            plugin.transform(message)
+        }
+
         val prefix = byteArrayOf(0x19, 0x52)
-        val addresseeBytes = addressee.toString().toByteArray()
+        val addresseeBytes = transformedMessage.chatId.toString().toByteArray()
 
-        val settingsBytes = byteArrayOf(encodeSettings(tone, frequency, invert, alpha))
+        val settingsBytes = byteArrayOf(transformedMessage.settings.toByte())
 
+        val textBytes = transformedMessage.text.toByteArray()
         val postfix = byteArrayOf(0x18u.toByte())
 
-        val transliteratedText = Transliterator.getInstance("Cyrillic-Latin")?.transliterate(text) ?: text
-
-        return prefix + addresseeBytes + settingsBytes + transliteratedText.toByteArray() + postfix
+        return prefix + addresseeBytes + settingsBytes + textBytes + postfix
     }
 
     fun sendToPager(
