@@ -41,6 +41,10 @@ class LoginFragment : Fragment() {
         }
 
         setupPinInput()
+
+        if (viewModel.isUsingBiometrics()) {
+            openBiometricPrompt()
+        }
     }
 
     override fun onResume() {
