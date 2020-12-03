@@ -22,7 +22,9 @@ class NotificationListener : NotificationListenerService() {
 
     @Suppress("DEPRECATION")
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        if (sbn.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0) return
+        if (sbn.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0
+            && sbn.notification.category != Notification.CATEGORY_CALL
+        ) return
 
         val title = sbn.notification.extras[Notification.EXTRA_TITLE]?.toString()
         val text = sbn.notification.extras[Notification.EXTRA_TEXT]?.toString()
@@ -52,7 +54,13 @@ class NotificationListener : NotificationListenerService() {
 
         if (addresseeIds.isEmpty()) return
 
-        PagerApplication.Logger.log("Fetched notification of ${sbn.packageName} with id = ${sbn.id}, postTime = ${Date(sbn.postTime)}")
+        PagerApplication.Logger.log(
+            "Fetched notification of ${sbn.packageName} with id = ${sbn.id}, postTime = ${
+                Date(
+                    sbn.postTime
+                )
+            }"
+        )
 
         val notificationAppInfo = try {
             packageManager.getApplicationInfo(sbn.packageName, 0)
@@ -65,7 +73,8 @@ class NotificationListener : NotificationListenerService() {
         else
             packageManager.getApplicationLabel(notificationAppInfo)
 
-        val forwardText = "*$notificationAppTitle*" + (if (title != null) " !$title!" else "") + (if (text != null) " $text" else "")
+        val forwardText =
+            "*$notificationAppTitle*" + (if (title != null) " !$title!" else "") + (if (text != null) " $text" else "")
 
         addresseeIds.forEach { id ->
             sendMessage(this, id, forwardText, saveIfError = false)
