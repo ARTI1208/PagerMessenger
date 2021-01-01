@@ -85,7 +85,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     // Java-based
-    api21Implementation "com.ibm.icu:icu4j:68.1"
+    api21Implementation "com.ibm.icu:icu4j:68.2"
     implementation 'com.google.guava:guava:30.0-android'
 
     // Kotlin-based
