@@ -10,7 +10,7 @@ import ru.art2000.pager.models.MessageDraft
 
 @Database(
     entities = [Addressee::class, Message::class, MessageDraft::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class MessagesDatabase : RoomDatabase() {

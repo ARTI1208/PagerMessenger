@@ -35,11 +35,6 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!viewModel.isSafeLogin()) {
-            gotoChatList()
-            return
-        }
-
         setupPinInput()
 
         if (viewModel.isUsingBiometrics()) {
@@ -50,6 +45,11 @@ class LoginFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         requireCompatActivity().supportActionBar?.hide()
+
+        if (!viewModel.isSafeLogin()) {
+            gotoChatList()
+            return
+        }
     }
 
     override fun onDestroy() {
