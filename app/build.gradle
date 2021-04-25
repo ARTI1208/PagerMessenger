@@ -92,7 +92,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // Android specific
-    def room_version = '2.3.0-beta02'
+    def room_version = '2.4.0-alpha01'
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.biometric:biometric:1.2.0-alpha03'
