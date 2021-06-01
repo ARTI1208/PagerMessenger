@@ -85,10 +85,11 @@ class ChatFragment : Fragment() {
             }
 
         }
+
+        setup()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    private fun setup(){
 
         updateActionBar()
 

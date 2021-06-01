@@ -63,6 +63,8 @@ abstract class ChatListFragment : Fragment() {
             LinearLayoutManager.VERTICAL
         )
         viewBinding.chatListRecycler.addItemDecoration(dividerItemDecoration)
+
+        setup()
     }
 
     override fun onResume() {
@@ -72,8 +74,7 @@ abstract class ChatListFragment : Fragment() {
         navigationCoordinator.setWindowTitle(title)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    private fun setup() {
 
         adapter.addLoadStateListener {
             if (adapter.itemCount == 0) {
