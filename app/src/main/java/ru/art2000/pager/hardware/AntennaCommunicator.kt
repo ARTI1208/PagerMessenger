@@ -7,16 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.util.Log
 import androidx.core.content.ContextCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import ru.art2000.pager.extensions.toInt
-import ru.art2000.pager.models.CommunicatorPlugin
 import ru.art2000.pager.models.Message
 import ru.art2000.pager.models.PagerMessage
-import ru.art2000.pager.plugins.CyrillicToLatinTransliterator
 import ru.art2000.pager.plugins.PluginManager
 import ru.art2000.pager.receivers.ACTION_USB_PERMISSION
 
@@ -123,11 +120,11 @@ object AntennaCommunicator {
         port.open(connection)
         port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
 
-        val res = port.write(bytes, 0)
+        port.write(bytes, 0)
 
         port.close()
 
-        return res
+        return bytes.size
     }
 
 }
